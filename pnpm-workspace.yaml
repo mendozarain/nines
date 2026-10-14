@@ -1,0 +1,9 @@
+packages:
+  - apps/*
+  - infra
+onlyBuiltDependencies:
+  - esbuild
+  - prisma
+  - "@prisma/engines"
+  - "@nestjs/core"
+  - "@tailwindcss/oxide"

@@ -1,0 +1,145 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/geist-mono";
+
+/*
+ * Beacon design system mapped onto shadcn/ui tokens.
+ * Charcoal ground, hairline borders, one blue for intent; green, amber and red only report status.
+ * Source: the Beacon Design System canvas (Colors, Type, Components boards).
+ */
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Surfaces */
+  --background: #0e1118; /* bg-0 ground */
+  --card: #151922; /* bg-1 surface */
+  --popover: #151922;
+  --muted: #1b202b; /* bg-2 raised: inputs, row hover */
+  --accent: #232937; /* bg-3 active: selected, pressed */
+  --secondary: #1b202b;
+
+  /* Text */
+  --foreground: #e8ecf4; /* fg-1 */
+  --card-foreground: #e8ecf4;
+  --popover-foreground: #e8ecf4;
+  --muted-foreground: #8089a0; /* fg-3 */
+  --accent-foreground: #e8ecf4;
+  --secondary-foreground: #e8ecf4;
+  --subtle-foreground: #a3abbd; /* fg-2 */
+
+  /* Intent */
+  --primary: #3563e9; /* Blue 600 */
+  --primary-foreground: #ffffff;
+  --ring: #4c7dff; /* Blue 400 */
+  --link: #7ea2ff; /* Blue 300 */
+  --info-tint: #1a2547;
+  --lamp: #ffd27a; /* the one warm spark */
+
+  /* Lines */
+  --border: #262c39; /* line-1 */
+  --input: #343b4b; /* line-2 */
+
+  /* Status: report only */
+  --success: #3fb97a;
+  --success-foreground: #5fd394;
+  --success-tint: #13291f;
+  --warning: #f2b84b;
+  --warning-tint: #2e2614;
+  --destructive: #f0645a;
+  --destructive-foreground: #ff8a80;
+  --destructive-tint: #301918;
+
+  /* Data (night ramp series) */
+  --chart-1: #4c7dff;
+  --chart-2: #ffd27a;
+  --chart-3: #b2c6ee;
+  --chart-4: #3558a6;
+  --chart-5: #8aa5dc;
+
+  /* Sidebar */
+  --sidebar: #0e1118;
+  --sidebar-foreground: #a3abbd;
+  --sidebar-accent: #1b202b;
+  --sidebar-accent-foreground: #e8ecf4;
+  --sidebar-border: #262c39;
+
+  /* Radii: 4 · 6 · 10 · 14 */
+  --radius: 0.625rem;
+
+  color-scheme: dark;
+}
+
+@theme inline {
+  --font-sans: "Geist Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, "SF Mono", Menlo, monospace;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-subtle-foreground: var(--subtle-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-link: var(--link);
+  --color-info-tint: var(--info-tint);
+  --color-lamp: var(--lamp);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-success-tint: var(--success-tint);
+  --color-warning: var(--warning);
+  --color-warning-tint: var(--warning-tint);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive-tint: var(--destructive-tint);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+
+  --radius-sm: 4px;
+  --radius-md: 6px; /* controls */
+  --radius-lg: 10px; /* cards, widgets */
+  --radius-xl: 14px;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html,
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+  body {
+    font-size: 14px;
+    line-height: 21px;
+  }
+  /* Numbers in tables and stat tiles use tabular figures so columns don't jitter. */
+  .num {
+    @apply font-mono;
+    font-variant-numeric: tabular-nums;
+  }
+  /* Mono labels: uppercase with 0.1em tracking. */
+  .label-mono {
+    @apply font-mono text-[11px] leading-4 font-medium uppercase tracking-[0.1em] text-muted-foreground;
+  }
+}
