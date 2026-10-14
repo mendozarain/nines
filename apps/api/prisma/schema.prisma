@@ -1,0 +1,181 @@
+// Nines database schema.
+// Money is always stored as whole centavos in BigInt columns (₱1.00 = 100).
+
+generator client {
+  provider = "prisma-client"
+  output              = "../src/generated/prisma"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// Better Auth tables (shape required by better-auth's Prisma adapter)
+// ---------------------------------------------------------------------------
+
+model User {
+  id            String       @id
+  name          String
+  email         String       @unique
+  emailVerified Boolean      @default(false)
+  image         String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+  memberships   Membership[]
+
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+// ---------------------------------------------------------------------------
+// Companies (one gas station business = one company) and who can access them
+// ---------------------------------------------------------------------------
+
+enum Role {
+  OWNER
+  ACCOUNTANT
+  CASHIER
+}
+
+enum TaxType {
+  VAT // VAT-registered: 12% VAT, files 2550Q
+  NON_VAT // Percentage tax: files 2551Q
+}
+
+model Company {
+  id          String          @id @default(cuid())
+  name        String // Registered business name
+  tradeName   String? // e.g. "Petron Brgy. San Isidro"
+  tin         String? // 000-000-000-00000
+  rdoCode     String?
+  address     String?
+  taxType     TaxType         @default(VAT)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  memberships Membership[]
+  accounts    LedgerAccount[]
+  journals    JournalEntry[]
+
+  @@map("company")
+}
+
+model Membership {
+  id        String   @id @default(cuid())
+  userId    String
+  companyId String
+  role      Role     @default(OWNER)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, companyId])
+  @@map("membership")
+}
+
+// ---------------------------------------------------------------------------
+// General ledger. Every module (sales, disbursements, AR, AP) posts here.
+// ---------------------------------------------------------------------------
+
+enum AccountType {
+  ASSET
+  LIABILITY
+  EQUITY
+  REVENUE
+  EXPENSE
+}
+
+model LedgerAccount {
+  id        String        @id @default(cuid())
+  companyId String
+  code      String // e.g. "1010"
+  name      String // e.g. "Cash on hand"
+  type      AccountType
+  isActive  Boolean       @default(true)
+  createdAt DateTime      @default(now())
+  company   Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  lines     JournalLine[]
+
+  @@unique([companyId, code])
+  @@map("ledger_account")
+}
+
+model JournalEntry {
+  id          String        @id @default(cuid())
+  companyId   String
+  date        DateTime      @db.Date
+  reference   String? // OR/SI/CV number
+  memo        String?
+  source      String        @default("manual") // manual | sales | disbursement | ar | ap
+  createdById String?
+  createdAt   DateTime      @default(now())
+  company     Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  lines       JournalLine[]
+
+  @@index([companyId, date])
+  @@map("journal_entry")
+}
+
+model JournalLine {
+  id        String        @id @default(cuid())
+  entryId   String
+  accountId String
+  debit     BigInt        @default(0) // centavos
+  credit    BigInt        @default(0) // centavos
+  memo      String?
+  entry     JournalEntry  @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  account   LedgerAccount @relation(fields: [accountId], references: [id])
+
+  @@index([accountId])
+  @@map("journal_line")
+}
