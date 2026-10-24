@@ -1,0 +1,81 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "CallerIdentity",
+      "Effect": "Allow",
+      "Action": "sts:GetCallerIdentity",
+      "Resource": "*"
+    },
+    {
+      "Sid": "AssumeCdkBootstrapRoles",
+      "Effect": "Allow",
+      "Action": "sts:AssumeRole",
+      "Resource": [
+        "arn:aws:iam::460047018105:role/cdk-hnb659fds-deploy-role-460047018105-ap-southeast-2",
+        "arn:aws:iam::460047018105:role/cdk-hnb659fds-file-publishing-role-460047018105-ap-southeast-2",
+        "arn:aws:iam::460047018105:role/cdk-hnb659fds-image-publishing-role-460047018105-ap-southeast-2",
+        "arn:aws:iam::460047018105:role/cdk-hnb659fds-lookup-role-460047018105-ap-southeast-2"
+      ]
+    },
+    {
+      "Sid": "CdkBootstrapVersion",
+      "Effect": "Allow",
+      "Action": "ssm:GetParameter",
+      "Resource": "arn:aws:ssm:ap-southeast-2:460047018105:parameter/cdk-bootstrap/hnb659fds/version"
+    },
+    {
+      "Sid": "NinesCluster",
+      "Effect": "Allow",
+      "Action": [
+        "rds:CreateDBCluster",
+        "rds:ModifyDBCluster",
+        "rds:DescribeDBClusters",
+        "rds:AddTagsToResource",
+        "rds:ListTagsForResource"
+      ],
+      "Resource": "arn:aws:rds:ap-southeast-2:460047018105:cluster:nines"
+    },
+    {
+      "Sid": "IamDatabaseAuth",
+      "Effect": "Allow",
+      "Action": "rds-db:connect",
+      "Resource": [
+        "arn:aws:rds-db:ap-southeast-2:460047018105:dbuser:*/postgres",
+        "arn:aws:rds-db:ap-southeast-2:460047018105:dbuser:*/nines_app"
+      ]
+    },
+    {
+      "Sid": "ReadStackOutputs",
+      "Effect": "Allow",
+      "Action": "cloudformation:DescribeStacks",
+      "Resource": "arn:aws:cloudformation:ap-southeast-2:460047018105:stack/Nines/*"
+    },
+    {
+      "Sid": "AppSecret",
+      "Effect": "Allow",
+      "Action": [
+        "secretsmanager:GetSecretValue",
+        "secretsmanager:PutSecretValue",
+        "secretsmanager:DescribeSecret"
+      ],
+      "Resource": "arn:aws:secretsmanager:ap-southeast-2:460047018105:secret:nines/app-*"
+    },
+    {
+      "Sid": "PublishFrontend",
+      "Effect": "Allow",
+      "Action": [
+        "amplify:CreateDeployment",
+        "amplify:StartDeployment",
+        "amplify:GetJob"
+      ],
+      "Resource": "arn:aws:amplify:ap-southeast-2:460047018105:apps/*"
+    },
+    {
+      "Sid": "InvokeMigrate",
+      "Effect": "Allow",
+      "Action": "lambda:InvokeFunction",
+      "Resource": "arn:aws:lambda:ap-southeast-2:460047018105:function:Nines-*"
+    }
+  ]
+}

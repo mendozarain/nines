@@ -26,7 +26,7 @@ function volume(dayIndex: number, pumpIndex: number, shiftIndex: number): bigint
   return BigInt(Math.round(base * shiftFactor * wave * 100));
 }
 
-async function main() {
+export async function seedDemo() {
   const existing = await prisma.user.findUnique({ where: { email: DEMO_EMAIL } });
   if (existing) {
     await prisma.user.delete({ where: { id: existing.id } });
@@ -268,11 +268,13 @@ async function main() {
   console.log(`Demo login: ${DEMO_EMAIL} / ${DEMO_PASSWORD}`);
 }
 
-main()
-  .catch((error) => {
-    console.error(error);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+if (require.main === module) {
+  seedDemo()
+    .catch((error) => {
+      console.error(error);
+      process.exit(1);
+    })
+    .finally(async () => {
+      await prisma.$disconnect();
+    });
+}

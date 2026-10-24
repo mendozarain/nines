@@ -10,6 +10,7 @@ import { AllExceptionsFilter } from "./common";
 
 export async function createApp() {
   const server = express();
+  server.set("trust proxy", 1);
   server.use("/api/auth", toNodeHandler(auth));
   server.use(express.json({ limit: "1mb" }));
 
@@ -18,8 +19,10 @@ export async function createApp() {
     logger: process.env.NODE_ENV === "test" ? false : ["error", "warn", "log"],
   });
   app.setGlobalPrefix("api");
+  const origins = [process.env.WEB_ORIGIN ?? "http://localhost:5173", "http://localhost:5173"];
+  if (process.env.BETTER_AUTH_URL) origins.push(process.env.BETTER_AUTH_URL);
   app.enableCors({
-    origin: [process.env.WEB_ORIGIN ?? "http://localhost:5173", "http://localhost:5173"],
+    origin: origins,
     credentials: true,
   });
   app.useGlobalFilters(new AllExceptionsFilter());
