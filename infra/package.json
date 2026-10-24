@@ -1,0 +1,19 @@
+{
+  "name": "@nines/infra",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "synth": "cdk synth",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "^2.220.0",
+    "constructs": "^10.4.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.18.8",
+    "aws-cdk": "^2.1029.0",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
+  }
+}

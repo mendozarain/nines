@@ -1,0 +1,25 @@
+{
+  "name": "nines",
+  "private": true,
+  "packageManager": "pnpm@10.33.4",
+  "engines": {
+    "node": ">=22"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["@prisma/engines", "prisma", "esbuild"]
+  },
+  "scripts": {
+    "predev": "pnpm --filter @nines/shared build",
+    "dev": "pnpm -r --parallel --filter @nines/api --filter @nines/web dev",
+    "build": "pnpm --filter @nines/shared build && pnpm --filter @nines/api build && pnpm --filter @nines/web build",
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "db:migrate": "pnpm --filter @nines/api exec prisma migrate deploy",
+    "db:migrate:dev": "pnpm --filter @nines/api exec prisma migrate dev",
+    "db:seed": "pnpm --filter @nines/api seed",
+    "db:generate": "pnpm --filter @nines/api exec prisma generate",
+    "test": "pnpm --filter @nines/shared build && pnpm --filter @nines/api test",
+    "test:e2e": "pnpm --filter @nines/web e2e",
+    "typecheck": "pnpm --filter @nines/shared typecheck && pnpm --filter @nines/api typecheck && pnpm --filter @nines/web typecheck"
+  }
+}

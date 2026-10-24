@@ -1,0 +1,259 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Better Auth tables. Model names stay PascalCase; table names stay lowercase.
+
+model User {
+  id            String    @id
+  name          String
+  email         String
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+  station       Station?
+
+  @@unique([email])
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+model Station {
+  id            String        @id @default(cuid())
+  name          String
+  tin           String
+  address       String
+  vatRegistered Boolean       @default(true)
+  ownerId       String        @unique
+  owner         User          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  products      FuelProduct[]
+  pumps         Pump[]
+  shifts        Shift[]
+  expenses      Expense[]
+  customers     Customer[]
+  suppliers     Supplier[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model FuelProduct {
+  id                    String   @id @default(cuid())
+  stationId             String
+  station               Station  @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  name                  String
+  pricePerLitreCentavos BigInt
+  active                Boolean  @default(true)
+  sortOrder             Int      @default(0)
+  pumps                 Pump[]
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([stationId])
+}
+
+model Pump {
+  id        String         @id @default(cuid())
+  stationId String
+  station   Station        @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  productId String
+  product   FuelProduct    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name      String
+  active    Boolean        @default(true)
+  sortOrder Int            @default(0)
+  readings  ShiftReading[]
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@index([stationId])
+}
+
+model Shift {
+  id             String         @id @default(cuid())
+  stationId      String
+  station        Station        @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  businessDate   DateTime       @db.Date
+  name           String
+  sortOrder      Int
+  cashCentavos   BigInt
+  cardCentavos   BigInt
+  creditCentavos BigInt
+  notes          String         @default("")
+  readings       ShiftReading[]
+  charges        CreditCharge[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  @@unique([stationId, businessDate, name])
+  @@index([stationId, businessDate])
+}
+
+model ShiftReading {
+  id                    String @id @default(cuid())
+  shiftId               String
+  shift                 Shift  @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+  pumpId                String
+  pump                  Pump   @relation(fields: [pumpId], references: [id], onDelete: Cascade)
+  openingCentilitres    BigInt
+  closingCentilitres    BigInt
+  litresCentilitres     BigInt
+  pricePerLitreCentavos BigInt
+  amountCentavos        BigInt
+
+  @@unique([shiftId, pumpId])
+}
+
+model Customer {
+  id        String            @id @default(cuid())
+  stationId String
+  station   Station           @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  name      String
+  phone     String            @default("")
+  notes     String            @default("")
+  charges   CreditCharge[]
+  payments  CustomerPayment[]
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  @@index([stationId])
+}
+
+model CreditCharge {
+  id             String    @id @default(cuid())
+  customerId     String
+  customer       Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  shiftId        String?
+  shift          Shift?    @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+  businessDate   DateTime  @db.Date
+  amountCentavos BigInt
+  note           String    @default("")
+  createdAt      DateTime  @default(now())
+
+  @@index([customerId])
+  @@index([shiftId])
+}
+
+model CustomerPayment {
+  id             String   @id @default(cuid())
+  customerId     String
+  customer       Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  businessDate   DateTime @db.Date
+  amountCentavos BigInt
+  note           String   @default("")
+  createdAt      DateTime @default(now())
+
+  @@index([customerId])
+}
+
+model Expense {
+  id             String   @id @default(cuid())
+  stationId      String
+  station        Station  @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  category       String
+  payee          String   @default("")
+  businessDate   DateTime @db.Date
+  amountCentavos BigInt
+  note           String   @default("")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([stationId, businessDate])
+}
+
+model Supplier {
+  id        String            @id @default(cuid())
+  stationId String
+  station   Station           @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  name      String
+  tin       String            @default("")
+  notes     String            @default("")
+  bills     Bill[]
+  payments  SupplierPayment[]
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  @@index([stationId])
+}
+
+model Bill {
+  id             String            @id @default(cuid())
+  supplierId     String
+  supplier       Supplier          @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  reference      String            @default("")
+  businessDate   DateTime          @db.Date
+  dueDate        DateTime?         @db.Date
+  amountCentavos BigInt
+  note           String            @default("")
+  payments       SupplierPayment[]
+  createdAt      DateTime          @default(now())
+
+  @@index([supplierId])
+}
+
+model SupplierPayment {
+  id             String   @id @default(cuid())
+  supplierId     String
+  supplier       Supplier @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  billId         String?
+  bill           Bill?    @relation(fields: [billId], references: [id], onDelete: SetNull)
+  businessDate   DateTime @db.Date
+  amountCentavos BigInt
+  note           String   @default("")
+  createdAt      DateTime @default(now())
+
+  @@index([supplierId])
+}
