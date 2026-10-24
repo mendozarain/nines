@@ -30,7 +30,6 @@ else
     "${AWS_ARGS[@]}" \
     --db-cluster-identifier "$CLUSTER" \
     --engine aurora-postgresql \
-    --engine-version 17.9 \
     --with-express-configuration \
     --tags Key=Project,Value=nines
   aws rds wait db-cluster-available "${AWS_ARGS[@]}" --db-cluster-identifier "$CLUSTER"

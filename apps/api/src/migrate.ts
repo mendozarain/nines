@@ -140,7 +140,7 @@ async function runSeed(databaseUrl: string): Promise<void> {
     await seedDemo();
     return;
   }
-  const tsx = require.resolve("tsx/dist/cli.mjs");
+  const tsx = require.resolve("tsx/cli");
   const code = await new Promise<number>((resolve, reject) => {
     const child = spawn(process.execPath, [tsx, "prisma/seed.ts"], {
       cwd: root,

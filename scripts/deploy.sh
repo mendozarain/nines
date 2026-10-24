@@ -99,8 +99,12 @@ if [[ "$SEED" == "1" ]]; then
 else
   echo "Applying migrations…"
 fi
+MIGRATE_ARGS=()
+if [[ "$SEED" == "1" ]]; then
+  MIGRATE_ARGS+=(--seed)
+fi
 DB_HOST="$DB_HOST" DB_NAME="nines" DB_USER="nines_app" DB_ADMIN_USER="postgres" DB_PORT="5432" \
-  pnpm --filter @nines/api exec tsx src/migrate.ts -- ${SEED:+--seed}
+  pnpm --filter @nines/api exec tsx src/migrate.ts ${MIGRATE_ARGS[@]+"${MIGRATE_ARGS[@]}"}
 
 bash infra/scripts/deploy-frontend.sh
 echo
