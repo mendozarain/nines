@@ -3,10 +3,6 @@
 **Source of truth:** [Nines Design System (Figma)](https://www.figma.com/design/Mt4SWTPaVSKfjeaZEP4Wjs)  
 Frames: **Nines Design System — Ofacc+** foundations + **LYNK / Ofacc inspo board**.
 
-> Note: Figma MCP on the Starter plan hit its tool-call limit while reading this file,
-> so tokens below are taken from the foundations overview (screenshots + color sampling).
-> Re-sync with `get_design_context` / variables once MCP quota is available.
-
 ## Foundations (Ofacc+)
 
 | Token | Value | Use |
@@ -19,42 +15,44 @@ Frames: **Nines Design System — Ofacc+** foundations + **LYNK / Ofacc inspo bo
 | Accent | `#0094FF` | Primary CTA, active tab, brand mark |
 | Accent soft | `#D3E3FD` | Soft selected / chip fills |
 | Success | mint `#ECFDF5` / `#065F46` | Paid / balanced |
-| Warning | coral `#FFF1F2` / `#9F1239` | Not paid / short |
-| Accent 2 | forest green | Positive charts / fulfilled |
-| Accent 3 | burnt orange | Caution / category |
+| Warning | coral / rose | Not paid / cash short / alerts |
 | Radius frame | `24px` | Outer app shell |
 | Radius control | `10px` | Buttons, inputs |
-| Radius pill | `999px` | Status badges, theme toggle |
-| Type | Plus Jakarta Sans | UI (SF Pro–like geometry) |
+| Radius pill | `999px` | Chips, search, status badges |
+| Type | Plus Jakarta Sans | UI |
 
-## Layout
+## Layout (LYNK shell)
 
 ```
-[ canvas #F3F5F7 ]
-  [ white rounded app frame + soft shadow ]
-    sidebar | main
-              top: search · user
-              page title · actions  (dashboard: greeting + quick actions)
-              underline tabs (optional)
-              content cards / tables
+[ canvas ]
+  [ white rounded app frame ]
+    sidebar                     | main
+      logo                      | slim header (Today date · refresh)
+      pill search (⌘K)          | page content
+      workspace switcher
+      nav (Dashboard → Today / Metrics)
+      user + theme
 ```
 
-- Sidebar: N mark, workspace label, soft gray pill for active, sun/moon toggle at bottom.
-- Tables: uppercase muted headers, tall rows, hairline dividers, avatar + name/subline.
-- Primary button filled accent; secondary outlined white.
+## Dashboard · Today (LYNK)
+
+Centered hero: greeting + subtitle + large pill search (opens command palette) + action chips.  
+Quick summary: narrative sentence + **borderless** metric strip (sales, expenses, cash, receivables, payables).  
+Critical alerts: rose card from real books signals (cash short, receivables, payables).  
+Bottom: 14-day sales chart + month sales-vs-expenses donut.
+
+No AI backend — search is ⌘K; alerts/metrics are `/api/dashboard` only.
 
 ## Code map
 
-| Primitive | File |
+| Piece | File |
 | --- | --- |
 | Tokens | `app/app.css` |
-| Shell | `app/routes/app-layout.tsx` |
-| Page header / metrics | `app/components/page.tsx` |
-| Status pill | `app/components/ui/badge.tsx` |
-| Avatar | `app/components/ui/avatar.tsx` |
-| Underline tabs | `app/components/ui/tabs.tsx` |
+| Shell + `openPalette` context | `app/routes/app-layout.tsx` |
+| Today dashboard | `app/routes/dashboard.tsx` |
+| Page helpers | `app/components/page.tsx` |
 
 ## Do / don’t
 
-- Do: whitespace, one accent blue, hairline dividers, soft status pills, card-on-canvas.
+- Do: whitespace, one accent blue, hairline dividers, soft pills, card-on-canvas.
 - Don’t: page gradients, glass stacks, serif display, purple themes, cream+terracotta, broadsheet columns.

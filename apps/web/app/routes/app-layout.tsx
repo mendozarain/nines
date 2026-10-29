@@ -1,5 +1,5 @@
 /**
- * Shell from Figma Nines Design System — Ofacc+. See apps/web/DESIGN.md
+ * LYNK-style shell: sidebar search + workspace. See apps/web/DESIGN.md
  */
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -12,6 +12,7 @@ import {
   Menu,
   Package,
   Receipt,
+  RefreshCw,
   Search,
   Settings,
   ShoppingCart,
@@ -19,7 +20,8 @@ import {
   Wallet,
   X,
 } from "lucide-react";
-import { Outlet, redirect, useNavigate } from "react-router";
+import { NavLink, Outlet, redirect, useLocation, useNavigate, useRevalidator } from "react-router";
+import { formatDate } from "@nines/shared";
 import { CommandPalette, type CommandItem } from "~/components/command-palette";
 import { SidebarGroup, type SidebarLink } from "~/components/sidebar-group";
 import { ThemeToggle } from "~/components/theme-toggle";
@@ -30,6 +32,10 @@ import { authClient } from "~/lib/auth-client";
 import { toggleTheme } from "~/lib/theme";
 import type { Me } from "~/lib/types";
 import { cn } from "~/lib/utils";
+
+export type AppShellContext = Me & {
+  openPalette: () => void;
+};
 
 export async function clientLoader({ request }: { request: Request }) {
   let me: Me;
@@ -57,9 +63,7 @@ function fuelEnabled(me: Me) {
 
 function Nav({ me, onNavigate }: { me: Me; onNavigate?: () => void }) {
   const fuel = fuelEnabled(me);
-
-  const primary: SidebarLink[] = [
-    { to: "/", label: "Dashboard", icon: LayoutDashboard, end: true },
+  const restPrimary: SidebarLink[] = [
     { to: "/sales", label: "Invoices", icon: Receipt },
     { to: "/customers", label: "Customers", icon: Users },
     { to: "/items", label: "Items", icon: Package },
@@ -88,7 +92,50 @@ function Nav({ me, onNavigate }: { me: Me; onNavigate?: () => void }) {
 
   return (
     <nav className="grid gap-1" aria-label="Main" data-sidebar>
-      <SidebarGroup links={primary} onNavigate={onNavigate} />
+      <NavLink
+        to="/"
+        end
+        onClick={onNavigate}
+        className={({ isActive }) =>
+          cn(
+            "flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-[13.5px] font-medium transition-colors",
+            isActive
+              ? "bg-accent-soft/70 text-foreground"
+              : "text-sidebar-foreground hover:bg-surface-hover/70 hover:text-foreground",
+          )
+        }
+      >
+        <LayoutDashboard className="h-4 w-4 shrink-0 opacity-70" strokeWidth={1.75} />
+        Dashboard
+      </NavLink>
+      <div className="mb-1 ml-4 grid gap-0.5 border-l border-border pl-3">
+        <NavLink
+          to="/"
+          end
+          onClick={onNavigate}
+          className={({ isActive }) =>
+            cn(
+              "rounded-lg px-2.5 py-1.5 text-[13px] font-medium transition-colors",
+              isActive ? "bg-surface-hover text-foreground" : "text-muted-foreground hover:bg-surface-hover/70 hover:text-foreground",
+            )
+          }
+        >
+          Today
+        </NavLink>
+        <NavLink
+          to="/reports"
+          onClick={onNavigate}
+          className={({ isActive }) =>
+            cn(
+              "rounded-lg px-2.5 py-1.5 text-[13px] font-medium transition-colors",
+              isActive ? "bg-surface-hover text-foreground" : "text-muted-foreground hover:bg-surface-hover/70 hover:text-foreground",
+            )
+          }
+        >
+          Metrics
+        </NavLink>
+      </div>
+      <SidebarGroup links={restPrimary} onNavigate={onNavigate} />
       <SidebarGroup label="Operations" links={operations} onNavigate={onNavigate} />
       <SidebarGroup label="Books" links={books} onNavigate={onNavigate} />
       <SidebarGroup label="Settings" links={settings} onNavigate={onNavigate} />
@@ -98,9 +145,12 @@ function Nav({ me, onNavigate }: { me: Me; onNavigate?: () => void }) {
 
 export default function AppLayout({ loaderData }: { loaderData: Me }) {
   const navigate = useNavigate();
+  const location = useLocation();
+  const revalidator = useRevalidator();
   const [menuOpen, setMenuOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
+  const isToday = location.pathname === "/";
 
   useEffect(() => {
     setIsDesktop(Boolean(window.ninesDesktop));
@@ -143,10 +193,58 @@ export default function AppLayout({ loaderData }: { loaderData: Me }) {
   }
 
   if (!loaderData.station) {
-    return <Outlet context={loaderData} />;
+    return <Outlet context={{ ...loaderData, openPalette } satisfies AppShellContext} />;
   }
 
   const userName = loaderData.user.name;
+  const todayLabel = loaderData.today ? `Today, ${formatDate(loaderData.today)}` : "Today";
+  const outletContext: AppShellContext = { ...loaderData, openPalette };
+
+  const sidebarBody = (
+    <>
+      <div className="px-3 pb-2 pt-4">
+        <div className="mb-3 flex items-center gap-2 px-1">
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-xs font-bold text-primary-foreground">N</span>
+          <span className="text-[15px] font-bold tracking-[-0.03em]">Nines</span>
+        </div>
+        <button
+          type="button"
+          onClick={openPalette}
+          className="flex h-9 w-full items-center gap-2 rounded-full border border-border bg-background px-3 text-left text-[12px] text-muted-foreground transition-colors hover:bg-surface-hover"
+        >
+          <Search className="h-3.5 w-3.5 shrink-0" strokeWidth={1.75} />
+          <span className="flex-1 truncate">Search…</span>
+          <kbd className="rounded-md border border-border bg-card px-1.5 text-[10px]">⌘K</kbd>
+        </button>
+        <button
+          type="button"
+          className="mt-2 flex w-full items-center gap-2 rounded-xl px-2 py-2 text-left hover:bg-surface-hover"
+        >
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-[13px] font-semibold text-foreground">{loaderData.station.name}</span>
+            <span className="block truncate text-[11px] text-muted-foreground">Workspace</span>
+          </span>
+          <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+        </button>
+      </div>
+      <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-4 pt-1">
+        <Nav me={loaderData} onNavigate={() => setMenuOpen(false)} />
+      </div>
+      <div className="space-y-3 border-t border-border px-3 py-4">
+        <div className="flex items-center gap-2 px-1">
+          <Avatar name={userName} size="sm" />
+          <div className="min-w-0 flex-1 leading-tight">
+            <p className="truncate text-[12px] font-semibold">{userName}</p>
+            <p className="truncate text-[11px] text-muted-foreground">{loaderData.user.email}</p>
+          </div>
+          <Button type="button" variant="ghost" size="icon" className="h-8 w-8 shrink-0" aria-label="Sign out" onClick={signOut}>
+            <LogOut className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+        <ThemeToggle />
+      </div>
+    </>
+  );
 
   return (
     <div className={cn("min-h-screen p-0 md:p-4 lg:p-5", isDesktop && "nines-drag-region")}>
@@ -163,27 +261,12 @@ export default function AppLayout({ loaderData }: { loaderData: Me }) {
           isDesktop && "nines-no-drag",
         )}
       >
-        <aside className="print-hide hidden w-[232px] shrink-0 flex-col border-r border-border bg-sidebar md:flex" data-sidebar>
-          <div className="px-4 pb-2 pt-5">
-            <button type="button" className="flex w-full items-center gap-2 rounded-xl px-2 py-2 text-left hover:bg-surface-hover">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-xs font-bold text-primary-foreground">N</span>
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-[13px] font-semibold text-foreground">Nines</span>
-                <span className="block truncate text-[11px] text-muted-foreground">{loaderData.station.name}</span>
-              </span>
-              <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
-            </button>
-          </div>
-          <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-4 pt-1">
-            <Nav me={loaderData} />
-          </div>
-          <div className="border-t border-border px-4 py-4">
-            <ThemeToggle />
-          </div>
+        <aside className="print-hide hidden w-[248px] shrink-0 flex-col border-r border-border bg-sidebar md:flex" data-sidebar>
+          {sidebarBody}
         </aside>
 
         <div className="flex min-w-0 flex-1 flex-col bg-card">
-          <header className="app-chrome sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-border bg-card/95 px-4 backdrop-blur print-hide md:px-6">
+          <header className="app-chrome sticky top-0 z-20 flex h-12 items-center gap-3 border-b border-border/70 bg-card/95 px-4 backdrop-blur print-hide md:px-6">
             <Button
               type="button"
               variant="ghost"
@@ -194,53 +277,54 @@ export default function AppLayout({ loaderData }: { loaderData: Me }) {
             >
               <Menu />
             </Button>
-            <button
-              type="button"
-              onClick={openPalette}
-              className="flex h-10 min-w-0 flex-1 items-center gap-2 rounded-[10px] border border-border bg-background px-3 text-left text-[13px] text-muted-foreground transition-colors hover:bg-surface-hover md:max-w-md"
-            >
-              <Search className="h-4 w-4 shrink-0" strokeWidth={1.75} />
-              <span className="truncate">Search invoices, customers, pages…</span>
-              <kbd className="ml-auto hidden rounded-md border border-border bg-card px-1.5 text-[10px] text-muted-foreground sm:inline">⌘K</kbd>
-            </button>
-            <div className="ml-auto flex items-center gap-2">
-              <div className="hidden items-center gap-2 sm:flex">
-                <Avatar name={userName} size="sm" />
-                <div className="min-w-0 leading-tight">
-                  <p className="truncate text-[12px] font-semibold">{userName}</p>
-                  <p className="truncate text-[11px] text-muted-foreground">{loaderData.user.email}</p>
-                </div>
-              </div>
-              <Button type="button" variant="ghost" size="icon" aria-label="Sign out" onClick={signOut}>
-                <LogOut className="h-4 w-4" />
-              </Button>
+            {isToday ? (
+              <p className="text-[13px] font-medium text-muted-foreground">{todayLabel}</p>
+            ) : (
+              <button
+                type="button"
+                onClick={openPalette}
+                className="flex h-9 min-w-0 flex-1 items-center gap-2 rounded-full border border-border bg-background px-3 text-left text-[13px] text-muted-foreground transition-colors hover:bg-surface-hover md:max-w-sm md:hidden"
+              >
+                <Search className="h-3.5 w-3.5 shrink-0" strokeWidth={1.75} />
+                <span className="truncate">Search…</span>
+              </button>
+            )}
+            <div className="ml-auto flex items-center gap-1">
+              {isToday ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  aria-label="Refresh"
+                  onClick={() => revalidator.revalidate()}
+                >
+                  <RefreshCw className="h-3.5 w-3.5" />
+                </Button>
+              ) : (
+                <Button type="button" variant="ghost" size="icon" className="hidden h-8 w-8 md:inline-flex" aria-label="Search" onClick={openPalette}>
+                  <Search className="h-3.5 w-3.5" />
+                </Button>
+              )}
             </div>
           </header>
 
           {menuOpen ? (
             <div className="fixed inset-0 z-40 print-hide md:hidden">
               <button className="absolute inset-0 bg-black/20" aria-label="Close menu" onClick={() => setMenuOpen(false)} />
-              <div className="absolute left-0 top-0 flex h-full w-[280px] flex-col overflow-y-auto bg-card p-3 shadow-2xl">
-                <div className="mb-3 flex items-center justify-between px-2 pt-2">
-                  <span className="text-[15px] font-semibold tracking-[-0.02em]">Nines</span>
+              <div className="absolute left-0 top-0 flex h-full w-[280px] flex-col overflow-y-auto bg-card shadow-2xl">
+                <div className="flex items-center justify-end px-2 pt-2">
                   <Button type="button" variant="ghost" size="icon" className="h-8 w-8" aria-label="Close menu" onClick={() => setMenuOpen(false)}>
                     <X />
                   </Button>
                 </div>
-                <Nav me={loaderData} onNavigate={() => setMenuOpen(false)} />
-                <div className="mt-auto space-y-3 border-t border-border pt-3">
-                  <ThemeToggle />
-                  <Button type="button" variant="ghost" size="sm" className="w-full justify-start" onClick={signOut}>
-                    <LogOut className="h-3.5 w-3.5" />
-                    Sign out
-                  </Button>
-                </div>
+                {sidebarBody}
               </div>
             </div>
           ) : null}
 
-          <main id="main" className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 md:px-8 md:py-8">
-            <Outlet context={loaderData} />
+          <main id="main" className={cn("mx-auto w-full flex-1 px-4 py-6 md:px-8 md:py-8", isToday ? "max-w-5xl" : "max-w-6xl")}>
+            <Outlet context={outletContext} />
           </main>
         </div>
       </div>
