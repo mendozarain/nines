@@ -11,13 +11,16 @@ export function AuthShell({
 }) {
   return (
     <main className="flex min-h-screen items-center justify-center px-4 py-16">
-      <div className="w-full max-w-[360px]">
-        <div className="mb-12 text-center">
-          <p className="text-[28px] font-semibold tracking-[-0.04em]">Nines</p>
-          <p className="mt-2 text-[15px] text-muted-foreground">Books for Philippine small businesses</p>
+      <div className="w-full max-w-[400px]">
+        <div className="mb-8 text-center">
+          <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-sm font-bold text-primary-foreground">
+            N
+          </div>
+          <p className="text-[28px] font-bold tracking-[-0.04em]">Nines</p>
+          <p className="mt-1 text-[14px] text-muted-foreground">Books for Philippine small businesses</p>
         </div>
-        <div className="rounded-2xl border border-border/60 bg-card px-6 py-7 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)]">
-          <h1 className="text-[21px] font-semibold tracking-[-0.03em]">{title}</h1>
+        <div className="nines-frame rounded-[24px] px-6 py-7">
+          <h1 className="text-[22px] font-bold tracking-[-0.03em]">{title}</h1>
           <p className="mt-1 text-[14px] text-muted-foreground">{subtitle}</p>
           <div className="mt-6 grid gap-4">{children}</div>
         </div>

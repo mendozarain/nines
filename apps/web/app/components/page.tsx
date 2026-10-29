@@ -16,12 +16,12 @@ export function PageHeader({
   action?: ReactNode;
 }) {
   return (
-    <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
       <div className="grid gap-1">
-        <h1 className="text-[28px] font-semibold leading-tight tracking-[-0.035em] text-foreground">{title}</h1>
+        <h1 className="text-[28px] font-bold leading-tight tracking-[-0.04em] text-foreground">{title}</h1>
         {description ? <p className="max-w-2xl text-[14px] leading-relaxed text-muted-foreground">{description}</p> : null}
       </div>
-      {action}
+      {action ? <div className="flex flex-wrap items-center gap-2">{action}</div> : null}
     </div>
   );
 }
@@ -37,7 +37,7 @@ export function OverShort({ value, className }: { value: string; className?: str
       className={cn(
         "font-medium tabular-nums",
         described.tone === "short" && "text-destructive",
-        described.tone === "over" && "text-emerald-700 dark:text-emerald-400",
+        described.tone === "over" && "text-success-fg",
         described.tone === "even" && "text-muted-foreground",
         className,
       )}
@@ -63,7 +63,7 @@ export function StatCard({
   const body = (
     <>
       <p className="text-[12px] font-medium text-muted-foreground">{label}</p>
-      <p className="mt-1.5 text-[26px] font-semibold tracking-[-0.03em] tabular-nums" data-testid={testId}>
+      <p className="mt-2 text-[24px] font-bold tracking-[-0.03em] tabular-nums" data-testid={testId}>
         {value}
       </p>
       {hint ? <p className="mt-1 text-[12px] text-muted-foreground">{hint}</p> : null}
@@ -71,12 +71,12 @@ export function StatCard({
   );
   if (href) {
     return (
-      <Link to={href} className="nines-metric">
+      <Link to={href} className="nines-metric block rounded-2xl border border-border/80 bg-card p-5 hover:bg-surface-hover/50">
         {body}
       </Link>
     );
   }
-  return <div className="nines-metric">{body}</div>;
+  return <div className="rounded-2xl border border-border/80 bg-card p-5">{body}</div>;
 }
 
 export function LoadingBlock({ label = "Loading…" }: { label?: string }) {
@@ -84,6 +84,21 @@ export function LoadingBlock({ label = "Loading…" }: { label?: string }) {
     <div className="flex items-center gap-2 text-[14px] text-muted-foreground" role="status">
       <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-muted-foreground/50" />
       {label}
+    </div>
+  );
+}
+
+export function EntityCell({
+  name,
+  subtitle,
+}: {
+  name: string;
+  subtitle?: string;
+}) {
+  return (
+    <div className="min-w-0">
+      <p className="truncate text-[14px] font-semibold text-foreground">{name}</p>
+      {subtitle ? <p className="truncate text-[12px] text-muted-foreground">{subtitle}</p> : null}
     </div>
   );
 }

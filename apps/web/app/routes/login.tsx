@@ -48,7 +48,7 @@ export default function Login() {
       </form>
       <p className="text-center text-[13px] text-muted-foreground">
         New station?{" "}
-        <Link className="font-medium text-primary underline-offset-4 hover:underline" to="/signup">
+        <Link className="font-semibold text-primary underline-offset-4 hover:underline" to="/signup">
           Create an account
         </Link>
       </p>

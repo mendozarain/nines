@@ -2,14 +2,12 @@ import * as React from "react";
 import * as TabsPrimitive from "@radix-ui/react-tabs";
 import { cn } from "~/lib/utils";
 
-function Tabs(props: React.ComponentProps<typeof TabsPrimitive.Root>) {
-  return <TabsPrimitive.Root {...props} />;
-}
+const Tabs = TabsPrimitive.Root;
 
 function TabsList({ className, ...props }: React.ComponentProps<typeof TabsPrimitive.List>) {
   return (
     <TabsPrimitive.List
-      className={cn("inline-flex h-auto flex-wrap items-center justify-start gap-1 rounded-lg bg-muted p-1 text-muted-foreground", className)}
+      className={cn("inline-flex h-auto w-full items-center gap-5 border-b border-border", className)}
       {...props}
     />
   );
@@ -19,7 +17,9 @@ function TabsTrigger({ className, ...props }: React.ComponentProps<typeof TabsPr
   return (
     <TabsPrimitive.Trigger
       className={cn(
-        "inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow",
+        "relative -mb-px pb-3 text-[14px] font-medium text-muted-foreground transition-colors",
+        "data-[state=active]:text-foreground data-[state=active]:after:absolute data-[state=active]:after:inset-x-0 data-[state=active]:after:bottom-0 data-[state=active]:after:h-0.5 data-[state=active]:after:rounded-full data-[state=active]:after:bg-primary",
+        "hover:text-foreground",
         className,
       )}
       {...props}
@@ -28,7 +28,7 @@ function TabsTrigger({ className, ...props }: React.ComponentProps<typeof TabsPr
 }
 
 function TabsContent({ className, ...props }: React.ComponentProps<typeof TabsPrimitive.Content>) {
-  return <TabsPrimitive.Content className={cn("mt-4 focus-visible:ring-offset-0", className)} {...props} />;
+  return <TabsPrimitive.Content className={cn("mt-5 outline-none", className)} {...props} />;
 }
 
 export { Tabs, TabsList, TabsTrigger, TabsContent };

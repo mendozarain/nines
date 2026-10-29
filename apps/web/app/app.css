@@ -3,68 +3,84 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
-  Apple-adjacent product UI:
-  soft canvas, white surfaces, ink type, system-blue actions,
-  hairline separators, almost no shadow or glass.
+  Ofacc+-inspired system (see DESIGN.md)
+  Canvas → white framed surface → accent #0066FF
 */
 :root {
   --radius: 0.625rem;
+  --radius-frame: 1.5rem;
   --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
-  --background: oklch(0.965 0.004 260);
-  --foreground: oklch(0.18 0.01 260);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.18 0.01 260);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.18 0.01 260);
-  --primary: oklch(0.5 0.14 255);
-  --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.94 0.005 260);
-  --secondary-foreground: oklch(0.25 0.01 260);
-  --muted: oklch(0.94 0.005 260);
-  --muted-foreground: oklch(0.48 0.015 260);
-  --accent: oklch(0.94 0.01 255);
-  --accent-foreground: oklch(0.22 0.03 255);
-  --destructive: oklch(0.55 0.2 25);
-  --border: oklch(0.88 0.006 260);
-  --input: oklch(0.88 0.006 260);
-  --ring: oklch(0.55 0.14 255);
-  --sidebar: oklch(0.975 0.003 260);
-  --sidebar-foreground: oklch(0.38 0.015 260);
-  --chart: oklch(0.5 0.14 255);
-  --surface-hover: oklch(0.955 0.005 260);
+
+  --background: #f3f5f7;
+  --foreground: #111827;
+  --card: #ffffff;
+  --card-foreground: #111827;
+  --popover: #ffffff;
+  --popover-foreground: #111827;
+  --primary: #0066ff;
+  --primary-foreground: #ffffff;
+  --secondary: #f3f4f6;
+  --secondary-foreground: #111827;
+  --muted: #f3f4f6;
+  --muted-foreground: #6b7280;
+  --accent: #f3f4f6;
+  --accent-foreground: #111827;
+  --destructive: #dc2626;
+  --border: #e5e7eb;
+  --input: #e5e7eb;
+  --ring: #0066ff;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #6b7280;
+  --chart: #0066ff;
+  --surface-hover: #f3f4f6;
+  --success-bg: #ecfdf5;
+  --success-fg: #065f46;
+  --warning-bg: #fff1f2;
+  --warning-fg: #9f1239;
+  --neutral-bg: #f3f4f6;
+  --neutral-fg: #374151;
+  --frame-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 12px 32px rgba(16, 24, 40, 0.06);
 }
 
 .dark {
-  --background: oklch(0.16 0.01 260);
-  --foreground: oklch(0.96 0.004 260);
-  --card: oklch(0.2 0.012 260);
-  --card-foreground: oklch(0.96 0.004 260);
-  --popover: oklch(0.2 0.012 260);
-  --popover-foreground: oklch(0.96 0.004 260);
-  --primary: oklch(0.68 0.13 255);
-  --primary-foreground: oklch(0.14 0.02 255);
-  --secondary: oklch(0.24 0.012 260);
-  --secondary-foreground: oklch(0.94 0.004 260);
-  --muted: oklch(0.24 0.012 260);
-  --muted-foreground: oklch(0.7 0.012 260);
-  --accent: oklch(0.25 0.02 255);
-  --accent-foreground: oklch(0.95 0.01 255);
-  --destructive: oklch(0.65 0.18 25);
-  --border: oklch(0.3 0.012 260);
-  --input: oklch(0.3 0.012 260);
-  --ring: oklch(0.65 0.12 255);
-  --sidebar: oklch(0.14 0.01 260);
-  --sidebar-foreground: oklch(0.78 0.01 260);
-  --chart: oklch(0.7 0.12 255);
-  --surface-hover: oklch(0.23 0.012 260);
+  --background: #0f1115;
+  --foreground: #f9fafb;
+  --card: #171a21;
+  --card-foreground: #f9fafb;
+  --popover: #171a21;
+  --popover-foreground: #f9fafb;
+  --primary: #3b82f6;
+  --primary-foreground: #ffffff;
+  --secondary: #1f2430;
+  --secondary-foreground: #f9fafb;
+  --muted: #1f2430;
+  --muted-foreground: #9ca3af;
+  --accent: #1f2430;
+  --accent-foreground: #f9fafb;
+  --destructive: #f87171;
+  --border: #2a3140;
+  --input: #2a3140;
+  --ring: #3b82f6;
+  --sidebar: #141821;
+  --sidebar-foreground: #9ca3af;
+  --chart: #60a5fa;
+  --surface-hover: #1f2430;
+  --success-bg: #052e1c;
+  --success-fg: #6ee7b7;
+  --warning-bg: #3f0d1a;
+  --warning-fg: #fda4af;
+  --neutral-bg: #1f2430;
+  --neutral-fg: #d1d5db;
+  --frame-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 12px 32px rgba(0, 0, 0, 0.35);
 }
 
 @theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+  --radius-xl: calc(var(--radius) + 6px);
+  --radius-2xl: var(--radius-frame);
   --font-sans: var(--font-sans);
   --font-display: var(--font-display);
   --color-background: var(--background);
@@ -89,6 +105,12 @@
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-chart: var(--chart);
   --color-surface-hover: var(--surface-hover);
+  --color-success-bg: var(--success-bg);
+  --color-success-fg: var(--success-fg);
+  --color-warning-bg: var(--warning-bg);
+  --color-warning-fg: var(--warning-fg);
+  --color-neutral-bg: var(--neutral-bg);
+  --color-neutral-fg: var(--neutral-fg);
 }
 
 @layer base {
@@ -105,32 +127,36 @@
   }
   .font-display {
     font-family: var(--font-display);
-    letter-spacing: -0.025em;
+    letter-spacing: -0.03em;
   }
   button,
   a,
   input,
   select,
   textarea {
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/25 focus-visible:ring-offset-2 focus-visible:ring-offset-background;
   }
 }
 
 @layer utilities {
+  .nines-frame {
+    background: var(--card);
+    box-shadow: var(--frame-shadow);
+  }
   .nines-row {
-    @apply rounded-xl bg-card px-4 py-3.5 transition-colors hover:bg-white dark:hover:bg-surface-hover;
+    @apply transition-colors hover:bg-surface-hover/70;
   }
   .nines-panel {
-    @apply overflow-hidden rounded-xl bg-card;
+    @apply overflow-hidden rounded-2xl border border-border/80 bg-card;
   }
   .nines-metric {
-    @apply block rounded-xl px-1 py-2 transition-colors hover:bg-white/70 dark:hover:bg-surface-hover;
+    @apply block rounded-xl px-1 py-1 transition-colors hover:bg-surface-hover/70;
   }
-  .nines-list {
-    @apply grid gap-px overflow-hidden rounded-xl bg-border/60;
+  .nines-table-head {
+    @apply px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.06em] text-muted-foreground;
   }
-  .nines-list > * {
-    @apply bg-card;
+  .nines-table-cell {
+    @apply px-4 py-4 align-middle text-sm;
   }
 }
 

@@ -1,25 +1,59 @@
-# Nines web design
+# Nines design system
 
-Direction: **Apple-calm product UI** — soft canvas, white surfaces, large type, almost no chrome.
+Reference: Ofacc+-style SaaS (user inspo). Product books UI — calm, airy, one accent blue.
 
-## Inspiration
+## Foundations
 
-Mobbin MCP was unavailable (paid plan on the connected account). The redesign follows
-finance/product patterns Mobbin typically surfaces for Apple-like tools:
+| Token | Value | Use |
+| --- | --- | --- |
+| Canvas | `#F3F5F7` | Page behind the app frame |
+| Surface | `#FFFFFF` | App frame, cards, tables |
+| Ink | `#111827` | Titles, primary data |
+| Muted | `#6B7280` | Labels, emails, dates |
+| Line | `#E5E7EB` | Hairline dividers only |
+| Accent | `#0066FF` | Primary CTA, active tab, badges |
+| Radius frame | `24px` | Outer app shell |
+| Radius control | `10px` | Buttons, inputs |
+| Radius pill | `999px` | Status badges, theme toggle |
+| Type | Plus Jakarta Sans | All UI |
 
-- Soft gray page canvas with white content tiles (Apple Music / Settings web feel)
-- Large tracking-tight titles, quiet secondary copy
-- Sidebar owns brand + nav; content owns one job
-- System-blue primary actions; ink text; hairline separators only when needed
-- Linear Cmd/Ctrl-K for jumps; Stripe-style metrics without heavy borders
+Status pills:
 
-## Rules in this codebase
+- **Paid** — mint bg / green text
+- **Awaiting** — gray bg / gray text
+- **Not paid** — soft coral bg / red text
 
-- One sans: `Plus Jakarta Sans`
-- Soft `--background`, white `--card` tiles (`rounded-2xl`)
-- Primary is blue (actions), not decorative teal gradients
-- Prefer `nines-row` / `nines-panel` over bordered shadow cards
-- No page gradients, glassmorphism stacks, or serif display fonts
-- Dark mode supported; light is the product default
+## Layout
 
-Avoid: purple themes, cream + terracotta serif, broadsheet layouts, multi-layer shadows, emoji.
+```
+[ canvas ]
+  [ white rounded app frame + soft shadow ]
+    sidebar | main
+              top: search · utilities · user
+              page title · actions
+              tabs (optional)
+              content (table / form / metrics)
+```
+
+- Sidebar: workspace name, icon+label nav, soft gray pill for active, theme toggle at bottom.
+- No heavy borders on cards — white on canvas + soft shadow is enough.
+- Tables: uppercase muted headers, tall rows, hairline row dividers, no vertical rules.
+- Customer/entity cells: avatar + **name** + muted subline.
+- Primary button filled accent; secondary outlined white.
+
+## Components (code)
+
+| Primitive | File |
+| --- | --- |
+| Tokens | `app/app.css` |
+| Shell | `app/routes/app-layout.tsx` |
+| Page header / metrics | `app/components/page.tsx` |
+| Status pill | `app/components/ui/badge.tsx` |
+| Avatar | `app/components/ui/avatar.tsx` |
+| Underline tabs | `app/components/ui/tabs.tsx` |
+| Buttons / inputs | `app/components/ui/*` |
+
+## Do / don’t
+
+- Do: whitespace, one accent, hairline dividers, soft status pills.
+- Don’t: page gradients, glass stacks, serif display, purple themes, cream+terracotta, broadsheet columns.
