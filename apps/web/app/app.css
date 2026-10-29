@@ -40,6 +40,13 @@
   --warning-fg: #9f1239;
   --neutral-bg: #f3f4f6;
   --neutral-fg: #374151;
+  --open-bg: #fff7ed;
+  --open-fg: #c2410c;
+  --info-bg: #ecfdf5;
+  --info-fg: #166534;
+  --sku-bg: #eff6ff;
+  --sku-fg: #0066ff;
+  --radius-panel: 0.75rem;
   --frame-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 12px 32px rgba(16, 24, 40, 0.06);
 }
 
@@ -72,6 +79,13 @@
   --warning-fg: #fda4af;
   --neutral-bg: #1f2430;
   --neutral-fg: #d1d5db;
+  --open-bg: #3b2108;
+  --open-fg: #fdba74;
+  --info-bg: #052e1c;
+  --info-fg: #6ee7b7;
+  --sku-bg: #172554;
+  --sku-fg: #93c5fd;
+  --radius-panel: 0.75rem;
   --frame-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 12px 32px rgba(0, 0, 0, 0.35);
 }
 
@@ -111,6 +125,12 @@
   --color-warning-fg: var(--warning-fg);
   --color-neutral-bg: var(--neutral-bg);
   --color-neutral-fg: var(--neutral-fg);
+  --color-open-bg: var(--open-bg);
+  --color-open-fg: var(--open-fg);
+  --color-info-bg: var(--info-bg);
+  --color-info-fg: var(--info-fg);
+  --color-sku-bg: var(--sku-bg);
+  --color-sku-fg: var(--sku-fg);
 }
 
 @layer base {
