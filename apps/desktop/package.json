@@ -1,0 +1,45 @@
+{
+  "name": "@nines/desktop",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Nines desktop shell (Electron)",
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "tsc && cp src/*.html dist/",
+    "dev": "NODE_ENV=development pnpm run build && electron .",
+    "package": "pnpm run build && electron-builder",
+    "package:linux": "pnpm run build && electron-builder --linux AppImage",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.18.8",
+    "electron": "^33.4.11",
+    "electron-builder": "^25.1.8",
+    "typescript": "^5.9.3"
+  },
+  "build": {
+    "appId": "ph.nines.desktop",
+    "productName": "Nines",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "package.json"
+    ],
+    "linux": {
+      "target": ["AppImage"],
+      "category": "Office"
+    },
+    "mac": {
+      "target": ["dmg"]
+    },
+    "win": {
+      "target": ["nsis"]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}

@@ -15,6 +15,13 @@ beforeAll(async () => {
 
 afterAll(async () => {
   if (emails.length > 0) {
+    // Journal lines restrict ledger-account deletes; clear journals before cascading the owner.
+    await prisma.journalLine.deleteMany({
+      where: { entry: { station: { owner: { email: { in: emails } } } } },
+    });
+    await prisma.journalEntry.deleteMany({
+      where: { station: { owner: { email: { in: emails } } } },
+    });
     await prisma.user.deleteMany({ where: { email: { in: emails } } });
   }
   await app.close();
@@ -52,6 +59,8 @@ async function setupStation(agent: request.Agent, vatRegistered = true) {
   return response.body as {
     pumps: { id: string; name: string; productName: string; pricePerLitreCentavos?: string }[];
     products: { id: string; name: string; pricePerLitreCentavos: string }[];
+    industry: string;
+    fuelModuleEnabled: boolean;
   };
 }
 
@@ -67,6 +76,8 @@ describe("station API", () => {
     expect(me.body.station).toBeNull();
 
     const station = await setupStation(agent);
+    expect(station.industry).toBe("FUEL_STATION");
+    expect(station.fuelModuleEnabled).toBe(true);
     const diesel = station.pumps.find((pump) => pump.name === "Pump 1")!;
     const unleaded = station.pumps.find((pump) => pump.name === "Pump 2")!;
     const today = manilaToday();
@@ -152,9 +163,14 @@ describe("station API", () => {
       payee: "Store",
       note: "Soap",
     });
-    expect(expense.status).toBe(201);
+    expect(expense.status, JSON.stringify(expense.body)).toBe(201);
 
-    const customer = await agent.post("/api/customers").send({ name: "Juan Cruz", phone: "0917 000 0000" });
+    const customer = await agent.post("/api/customers").send({
+      name: "Juan Cruz",
+      phone: "0917 000 0000",
+      allowsCharge: true,
+      creditLimit: "5000.00",
+    });
     expect(customer.status).toBe(201);
     await agent.post(`/api/customers/${customer.body.id}/charges`).send({
       businessDate: today,
@@ -211,5 +227,140 @@ describe("station API", () => {
     const vatOff = await agent.get("/api/reports/vat").query({ month: manilaMonth() });
     expect(vatOff.body.vatRegistered).toBe(false);
     expect(vatOff.body.outputVatCentavos).toBe("0");
+  });
+
+  it("sets up a general business without pumps", async () => {
+    const agent = await signUp();
+    const response = await agent.post("/api/station").send({
+      name: "Corner Store",
+      tin: "111-222-333-000",
+      address: "9 Mabini Street, Cainta, Rizal",
+      vatRegistered: true,
+      industry: "GENERAL",
+      fuelModuleEnabled: false,
+      products: [],
+      pumps: [],
+    });
+    expect(response.status, JSON.stringify(response.body)).toBe(201);
+    expect(response.body.industry).toBe("GENERAL");
+    expect(response.body.fuelModuleEnabled).toBe(false);
+    expect(response.body.products).toEqual([]);
+    expect(response.body.pumps).toEqual([]);
+
+    const me = await agent.get("/api/me");
+    expect(me.body.station.industry).toBe("GENERAL");
+    expect(me.body.station.fuelModuleEnabled).toBe(false);
+    expect(me.body.station.taxRegime).toBe("VAT");
+
+    const accounts = await agent.get("/api/books/accounts");
+    expect(accounts.status).toBe(200);
+    expect(accounts.body.accounts.some((row: { code: string }) => row.code === "4030")).toBe(true);
+    expect(accounts.body.accounts.some((row: { code: string }) => row.code === "4000")).toBe(false);
+  });
+
+  it("blocks charges over the credit limit and validates tax-exempt profiles", async () => {
+    const agent = await signUp();
+    await setupStation(agent);
+    const today = manilaToday();
+
+    const badExempt = await agent.post("/api/customers").send({
+      name: "Exempt Co",
+      type: "ORGANIZATION",
+      taxTreatment: "VAT_EXEMPT",
+      allowsCharge: true,
+      creditLimit: "1000.00",
+    });
+    expect(badExempt.status).toBe(400);
+    expect(badExempt.body.message).toMatch(/reason|reference|certificate/i);
+
+    const customer = await agent.post("/api/customers").send({
+      name: "Fleet Co",
+      type: "ORGANIZATION",
+      allowsCharge: true,
+      creditLimit: "1000.00",
+      paymentTermsDays: 30,
+      taxTreatment: "VAT_EXEMPT",
+      taxExemptReason: "Cooperative exemption",
+      taxExemptReference: "BIR-COE-1",
+    });
+    expect(customer.status, JSON.stringify(customer.body)).toBe(201);
+
+    const ok = await agent.post(`/api/customers/${customer.body.id}/charges`).send({
+      businessDate: today,
+      amount: "800.00",
+    });
+    expect(ok.status, JSON.stringify(ok.body)).toBe(201);
+    expect(ok.body.balanceCentavos).toBe("80000");
+
+    const blocked = await agent.post(`/api/customers/${customer.body.id}/charges`).send({
+      businessDate: today,
+      amount: "300.00",
+    });
+    expect(blocked.status).toBe(400);
+    expect(blocked.body.message).toMatch(/credit limit/i);
+
+    const forced = await agent.post(`/api/customers/${customer.body.id}/charges`).send({
+      businessDate: today,
+      amount: "300.00",
+      allowOverLimit: true,
+    });
+    expect(forced.status, JSON.stringify(forced.body)).toBe(201);
+  });
+
+  it("creates a sales invoice with VAT split and balances the trial balance", async () => {
+    const agent = await signUp();
+    const station = await agent.post("/api/station").send({
+      name: "Retail Shop",
+      tin: "999-888-777-000",
+      address: "12 Luna Street, Pasig City",
+      vatRegistered: true,
+      industry: "RETAIL",
+      fuelModuleEnabled: false,
+    });
+    expect(station.status, JSON.stringify(station.body)).toBe(201);
+
+    const item = await agent.post("/api/items").send({
+      name: "Bottled water",
+      unit: "pc",
+      price: "20.00",
+      taxType: "VATABLE",
+      stockQty: "50.00",
+    });
+    expect(item.status, JSON.stringify(item.body)).toBe(201);
+
+    const today = manilaToday();
+    const invoice = await agent.post("/api/sales").send({
+      businessDate: today,
+      paymentMethod: "CASH",
+      buyerName: "Cash customer",
+      lines: [
+        {
+          itemId: item.body.id,
+          description: "Bottled water",
+          unit: "pc",
+          qty: "10.00",
+          unitPrice: "20.00",
+        },
+      ],
+    });
+    expect(invoice.status, JSON.stringify(invoice.body)).toBe(201);
+    expect(invoice.body.number).toBe("INV-00001");
+    expect(invoice.body.grossCentavos).toBe("20000");
+    // 12/112 of ₱200.00
+    expect(invoice.body.vatCentavos).toBe("2143");
+    expect(invoice.body.netCentavos).toBe("17857");
+    expect(invoice.body.totalCentavos).toBe("20000");
+
+    const vat = await agent.get("/api/reports/vat").query({ month: manilaMonth() });
+    expect(vat.body.vatableSalesCentavos).toBe("17857");
+    expect(vat.body.outputVatCentavos).toBe("2143");
+
+    const tb = await agent.get("/api/books/trial-balance");
+    expect(tb.status).toBe(200);
+    expect(tb.body.balanced).toBe(true);
+    expect(BigInt(tb.body.totalDebitCentavos)).toBe(BigInt(tb.body.totalCreditCentavos));
+    expect(tb.body.rows.some((row: { code: string }) => row.code === "1000")).toBe(true);
+    expect(tb.body.rows.some((row: { code: string }) => row.code === "4030")).toBe(true);
+    expect(tb.body.rows.some((row: { code: string }) => row.code === "2040")).toBe(true);
   });
 });

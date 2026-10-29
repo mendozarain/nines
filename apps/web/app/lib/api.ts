@@ -6,6 +6,10 @@ export class ApiError extends Error {
   }
 }
 
+export function isMissingEndpoint(error: unknown) {
+  return error instanceof ApiError && (error.status === 404 || error.status === 501);
+}
+
 export async function api<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(path, {
     ...init,
@@ -21,4 +25,14 @@ export async function api<T>(path: string, init?: RequestInit): Promise<T> {
     throw new ApiError(data?.message ?? "Something went wrong. Please try again.", response.status);
   }
   return data as T;
+}
+
+/** Soft fetch for endpoints still landing in parallel API work. */
+export async function apiOptional<T>(path: string, fallback: T, init?: RequestInit): Promise<T> {
+  try {
+    return await api<T>(path, init);
+  } catch (error) {
+    if (isMissingEndpoint(error)) return fallback;
+    throw error;
+  }
 }

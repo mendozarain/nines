@@ -7,18 +7,31 @@ async function signUpAndSetup(page: import("@playwright/test").Page, email: stri
   await page.getByLabel("Password", { exact: true }).fill("password123");
   await page.getByLabel("Confirm password").fill("password123");
   await page.getByRole("button", { name: "Create account" }).click();
-  await expect(page.getByText("Step 1 of 3")).toBeVisible();
+  await expect(page.getByText("Step 1 of")).toBeVisible();
 
-  await page.getByLabel("Station name").fill("Playwright Gas");
+  await page.getByRole("button", { name: /Fuel station/i }).click();
+  await expect(page.getByText("Step 1 of 6")).toBeVisible();
+  await page.getByRole("button", { name: "Continue" }).click();
+
+  await expect(page.getByText("Step 2 of 6")).toBeVisible();
+  await page.getByLabel("Business name").fill("Playwright Gas");
   await page.getByLabel("TIN").fill("123-456-789-000");
   await page.getByLabel("Address").fill("1 Test Street, Quezon City");
   await page.getByRole("button", { name: "Continue" }).click();
-  await expect(page.getByText("Step 2 of 3")).toBeVisible();
+
+  await expect(page.getByText("Step 3 of 6")).toBeVisible();
   await page.getByRole("button", { name: "Continue" }).click();
-  await expect(page.getByText("Step 3 of 3")).toBeVisible();
+
+  await expect(page.getByText("Step 4 of 6")).toBeVisible();
+  await page.getByRole("button", { name: "Continue" }).click();
+
+  await expect(page.getByText("Step 5 of 6")).toBeVisible();
   await page.getByRole("button", { name: "Remove" }).nth(2).click();
   await page.getByRole("button", { name: "Remove" }).nth(1).click();
-  await page.getByRole("button", { name: "Open my station" }).click();
+  await page.getByRole("button", { name: "Continue" }).click();
+
+  await expect(page.getByText("Step 6 of 6")).toBeVisible();
+  await page.getByRole("button", { name: "Open my books" }).click();
   await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();
 }
 
@@ -54,7 +67,7 @@ test("owner can add an expense and open the daily report", async ({ page }) => {
   await expect(page.getByText("Soap")).toBeVisible();
   await expect(page.getByText("₱120.00").first()).toBeVisible();
 
-  await page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Reports", exact: true }).click();
+  await page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Daily / monthly / VAT", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Reports" })).toBeVisible();
   await expect(page.getByText("₱120.00").first()).toBeVisible();
   await page.getByRole("tab", { name: "VAT" }).click();

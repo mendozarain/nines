@@ -6,7 +6,7 @@
     "node": ">=22"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["@prisma/engines", "prisma", "esbuild"]
+    "onlyBuiltDependencies": ["@prisma/engines", "prisma", "esbuild", "electron"]
   },
   "scripts": {
     "predev": "pnpm --filter @nines/shared build",
@@ -20,6 +20,8 @@
     "db:generate": "pnpm --filter @nines/api exec prisma generate",
     "test": "pnpm --filter @nines/shared build && pnpm --filter @nines/api test",
     "test:e2e": "pnpm --filter @nines/web e2e",
-    "typecheck": "pnpm --filter @nines/shared typecheck && pnpm --filter @nines/api typecheck && pnpm --filter @nines/web typecheck"
+    "typecheck": "pnpm --filter @nines/shared typecheck && pnpm --filter @nines/api typecheck && pnpm --filter @nines/web typecheck",
+    "desktop:dev": "pnpm --filter @nines/desktop dev",
+    "desktop:package": "pnpm --filter @nines/desktop package:linux"
   }
 }

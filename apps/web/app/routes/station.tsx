@@ -38,7 +38,7 @@ export default function StationPage() {
 
   return (
     <div className="grid gap-6">
-      <PageHeader title="Station" description="Name, TIN, fuel prices, and which pumps are in use." />
+      <PageHeader title="Business / station" description="Name, TIN, tax status, and (when fuel is on) prices and pumps." />
       <FormError message={formError} />
       {message ? <p className="text-sm text-muted-foreground">{message}</p> : null}
       <DetailsForm station={data} onSave={save} />

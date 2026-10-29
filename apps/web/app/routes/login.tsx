@@ -33,7 +33,7 @@ export default function Login() {
   }
 
   return (
-    <AuthShell title="Sign in" subtitle="Open the station books for today’s shift.">
+    <AuthShell title="Sign in" subtitle="Open your books for the day.">
       <form className="grid gap-4" onSubmit={onSubmit}>
         <FormError message={error} />
         <Field label="Email" htmlFor="email">

@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import { Fuel } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 
 export function AuthShell({
@@ -12,15 +11,13 @@ export function AuthShell({
   children: ReactNode;
 }) {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
+    <main className="flex min-h-screen items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <div className="mb-6 flex items-center gap-2">
-          <span className="grid h-9 w-9 place-items-center rounded-md bg-primary text-primary-foreground">
-            <Fuel className="h-5 w-5" />
-          </span>
-          <span className="text-lg font-semibold">Nines</span>
+        <div className="mb-6">
+          <p className="font-display text-3xl font-semibold tracking-tight">Nines</p>
+          <p className="mt-1 text-sm text-muted-foreground">Small-business books for the Philippines</p>
         </div>
-        <Card>
+        <Card className="border-border/80 bg-card/90 shadow-sm">
           <CardHeader>
             <CardTitle className="text-xl">{title}</CardTitle>
             <CardDescription>{subtitle}</CardDescription>

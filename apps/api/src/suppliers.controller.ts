@@ -74,6 +74,9 @@ export class SuppliersController {
         reference: bill.reference,
         note: bill.note,
         amountCentavos: cents(bill.amountCentavos),
+        netCentavos: cents(bill.netCentavos),
+        vatCentavos: cents(bill.vatCentavos),
+        withholdingCentavos: cents(bill.withholdingCentavos),
       })),
       payments: supplier.payments.map((payment) => ({
         id: payment.id,
@@ -104,12 +107,18 @@ export class SuppliersController {
     const supplier = await prisma.supplier.findFirst({ where: { id, stationId: station.id } });
     if (!supplier) notFound("That supplier was not found.");
     const input = parseBody(billSchema, body);
+    const vat = input.vat ?? 0n;
+    const withholding = input.withholding ?? 0n;
+    const net = input.net ?? (vat > 0n || withholding > 0n ? input.amount - vat : input.amount);
     await prisma.bill.create({
       data: {
         supplierId: id,
         businessDate: dateOnly(input.businessDate),
         dueDate: input.dueDate ? dateOnly(input.dueDate) : null,
         amountCentavos: input.amount,
+        netCentavos: net,
+        vatCentavos: vat,
+        withholdingCentavos: withholding,
         reference: input.reference,
         note: input.note,
       },

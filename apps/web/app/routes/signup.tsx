@@ -44,7 +44,7 @@ export default function Signup() {
   }
 
   return (
-    <AuthShell title="Create your account" subtitle="Then we’ll set up the station, pumps, and fuel prices.">
+    <AuthShell title="Create your account" subtitle="Then a short setup for your business and books.">
       <form className="grid gap-4" onSubmit={onSubmit}>
         <FormError message={error} />
         <Field label="Your name" htmlFor="name">

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nines — offline</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+        background: #f1f5f9;
+        color: #0f172a;
+      }
+      .card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 2rem;
+        max-width: 26rem;
+        box-shadow: 0 10px 40px rgba(15, 23, 42, 0.08);
+        text-align: center;
+      }
+      h1 {
+        font-size: 1.25rem;
+        margin: 0 0 0.5rem;
+      }
+      p {
+        margin: 0 0 1.25rem;
+        color: #475569;
+        line-height: 1.5;
+      }
+      button {
+        appearance: none;
+        border: none;
+        border-radius: 8px;
+        background: #0284c7;
+        color: #fff;
+        font-size: 1rem;
+        font-weight: 600;
+        padding: 0.65rem 1.25rem;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #0369a1;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Can’t reach Nines</h1>
+      <p id="detail">
+        Check your internet connection, or wait a moment if the server is waking up, then try again.
+      </p>
+      <button type="button" id="retry">Retry</button>
+    </div>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const appUrl = params.get("url");
+      const detail = document.getElementById("detail");
+      if (appUrl) {
+        detail.textContent =
+          "Could not load " +
+          appUrl +
+          ". Check your connection or wait for the cloud database to resume, then retry.";
+      }
+      document.getElementById("retry").addEventListener("click", () => {
+        if (appUrl) {
+          window.location.href = appUrl;
+        } else {
+          window.location.reload();
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -1,7 +1,10 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router";
 import { describeOverShort, formatCentavos } from "@nines/shared";
+import { EmptyState } from "~/components/empty-state";
 import { cn } from "~/lib/utils";
+
+export { EmptyState };
 
 export function PageHeader({
   title,
@@ -15,28 +18,10 @@ export function PageHeader({
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div className="grid gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+        <h1 className="font-display text-2xl font-semibold tracking-tight">{title}</h1>
         {description ? <p className="max-w-2xl text-sm text-muted-foreground">{description}</p> : null}
       </div>
       {action}
-    </div>
-  );
-}
-
-export function EmptyState({
-  title,
-  description,
-  action,
-}: {
-  title: string;
-  description: string;
-  action?: ReactNode;
-}) {
-  return (
-    <div className="rounded-xl border border-dashed bg-card px-6 py-12 text-center">
-      <h2 className="text-lg font-medium">{title}</h2>
-      <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">{description}</p>
-      {action ? <div className="mt-4 flex justify-center">{action}</div> : null}
     </div>
   );
 }
@@ -52,7 +37,7 @@ export function OverShort({ value, className }: { value: string; className?: str
       className={cn(
         "font-medium tabular-nums",
         described.tone === "short" && "text-destructive",
-        described.tone === "over" && "text-green-700",
+        described.tone === "over" && "text-emerald-700 dark:text-emerald-400",
         described.tone === "even" && "text-muted-foreground",
         className,
       )}
@@ -84,7 +69,7 @@ export function StatCard({
       {hint ? <p className="mt-1 text-sm text-muted-foreground">{hint}</p> : null}
     </>
   );
-  const className = "rounded-xl border bg-card p-4 shadow-sm transition-colors hover:bg-accent/40";
+  const className = "rounded-xl border border-border/70 bg-card/80 p-4 shadow-sm transition-colors hover:bg-accent/40";
   if (href) {
     return (
       <Link to={href} className={className}>

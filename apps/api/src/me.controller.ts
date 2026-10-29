@@ -19,6 +19,10 @@ export class MeController {
             tin: station.tin,
             address: station.address,
             vatRegistered: station.vatRegistered,
+            industry: station.industry,
+            fuelModuleEnabled: station.fuelModuleEnabled,
+            taxRegime: station.taxRegime,
+            percentageTaxRateBps: station.percentageTaxRateBps,
           }
         : null,
       today: manilaToday(),

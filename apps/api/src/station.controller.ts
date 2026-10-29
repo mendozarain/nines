@@ -1,5 +1,7 @@
 import { BadRequestException, Body, Controller, Get, Param, Patch, Post, UseGuards } from "@nestjs/common";
 import type { AuthUser } from "./auth";
+import { ensureChartOfAccounts, postJournalEntry } from "./books";
+import { manilaToday } from "@nines/shared";
 import { AuthGuard, cents, CurrentUser, notFound, parseBody, stationFor } from "./common";
 import { prisma } from "./prisma";
 import {
@@ -41,6 +43,10 @@ export async function getStation(userId: string) {
     tin: station.tin,
     address: station.address,
     vatRegistered: station.vatRegistered,
+    industry: station.industry,
+    fuelModuleEnabled: station.fuelModuleEnabled,
+    taxRegime: station.taxRegime,
+    percentageTaxRateBps: station.percentageTaxRateBps,
     products: products.map((product) => ({
       id: product.id,
       name: product.name,
@@ -82,14 +88,23 @@ export class StationController {
     const input = parseBody(stationSetupSchema, body);
     const existing = await prisma.station.findUnique({ where: { ownerId: user.id } });
     if (existing) throw new BadRequestException("You already have a station.");
-    uniqueNames(
-      input.products.map((product) => product.name),
-      "products",
-    );
-    uniqueNames(
-      input.pumps.map((pump) => pump.name),
-      "pumps",
-    );
+
+    const fuelModuleEnabled = input.fuelModuleEnabled ?? input.industry === "FUEL_STATION";
+    const taxRegime = input.taxRegime ?? (input.vatRegistered ? "VAT" : "PERCENTAGE_TAX");
+    const percentageTaxRateBps = input.percentageTaxRateBps ?? 300;
+
+    if (input.products.length > 0) {
+      uniqueNames(
+        input.products.map((product) => product.name),
+        "products",
+      );
+    }
+    if (input.pumps.length > 0) {
+      uniqueNames(
+        input.pumps.map((pump) => pump.name),
+        "pumps",
+      );
+    }
 
     await prisma.$transaction(async (tx) => {
       const station = await tx.station.create({
@@ -99,34 +114,60 @@ export class StationController {
           tin: input.tin,
           address: input.address,
           vatRegistered: input.vatRegistered,
+          industry: input.industry,
+          fuelModuleEnabled,
+          taxRegime,
+          percentageTaxRateBps,
         },
       });
-      const products = [];
-      for (const [index, product] of input.products.entries()) {
-        products.push(
-          await tx.fuelProduct.create({
+
+      await ensureChartOfAccounts(station.id, fuelModuleEnabled, tx);
+
+      if (fuelModuleEnabled || input.products.length > 0) {
+        const products = [];
+        for (const [index, product] of input.products.entries()) {
+          products.push(
+            await tx.fuelProduct.create({
+              data: {
+                stationId: station.id,
+                name: product.name,
+                pricePerLitreCentavos: product.price,
+                sortOrder: index,
+              },
+            }),
+          );
+        }
+        for (const [index, pump] of input.pumps.entries()) {
+          const product = products.find((item) => item.name.toLowerCase() === pump.productName.toLowerCase());
+          if (!product) {
+            throw new BadRequestException(`${pump.name} needs one of the fuels you added.`);
+          }
+          await tx.pump.create({
             data: {
               stationId: station.id,
-              name: product.name,
-              pricePerLitreCentavos: product.price,
+              name: pump.name,
+              productId: product.id,
               sortOrder: index,
             },
-          }),
-        );
-      }
-      for (const [index, pump] of input.pumps.entries()) {
-        const product = products.find((item) => item.name.toLowerCase() === pump.productName.toLowerCase());
-        if (!product) {
-          throw new BadRequestException(`${pump.name} needs one of the fuels you added.`);
+          });
         }
-        await tx.pump.create({
-          data: {
-            stationId: station.id,
-            name: pump.name,
-            productId: product.id,
-            sortOrder: index,
+      }
+
+      if (input.openingBalances.length > 0) {
+        await postJournalEntry(
+          station.id,
+          {
+            businessDate: manilaToday(),
+            description: "Opening balances",
+            source: "OPENING",
+            lines: input.openingBalances.map((row) => ({
+              code: row.code,
+              debitCentavos: row.debit ?? 0n,
+              creditCentavos: row.credit ?? 0n,
+            })),
           },
-        });
+          tx,
+        );
       }
     });
 
@@ -137,14 +178,34 @@ export class StationController {
   async update(@CurrentUser() user: AuthUser, @Body() body: unknown) {
     const input = parseBody(stationPatchSchema, body);
     const station = await stationFor(user.id);
-    await prisma.station.update({
-      where: { id: station.id },
-      data: {
-        name: input.name,
-        tin: input.tin,
-        address: input.address,
-        vatRegistered: input.vatRegistered,
-      },
+    const fuelModuleEnabled = input.fuelModuleEnabled ?? station.fuelModuleEnabled;
+    const taxRegime =
+      input.taxRegime ??
+      (input.vatRegistered !== station.vatRegistered
+        ? input.vatRegistered
+          ? "VAT"
+          : "PERCENTAGE_TAX"
+        : station.taxRegime);
+
+    await prisma.$transaction(async (tx) => {
+      await tx.station.update({
+        where: { id: station.id },
+        data: {
+          name: input.name,
+          tin: input.tin,
+          address: input.address,
+          vatRegistered: input.vatRegistered,
+          industry: input.industry ?? station.industry,
+          fuelModuleEnabled,
+          taxRegime,
+          percentageTaxRateBps: input.percentageTaxRateBps ?? station.percentageTaxRateBps,
+        },
+      });
+      if (fuelModuleEnabled && !station.fuelModuleEnabled) {
+        await ensureChartOfAccounts(station.id, true, tx);
+      } else if (fuelModuleEnabled || input.industry) {
+        await ensureChartOfAccounts(station.id, fuelModuleEnabled, tx);
+      }
     });
     return getStation(user.id);
   }
