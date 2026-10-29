@@ -1,8 +1,12 @@
 import { BadRequestException } from "@nestjs/common";
-import { chartOfAccountsFor } from "@nines/shared";
+import { chartOfAccountsFor, splitInclusiveVat } from "@nines/shared";
 import type { Prisma } from "./generated/prisma/client";
 import { prisma } from "./prisma";
 import { cents, dateOnly, dayString } from "./common";
+
+export function shiftJournalSourceDocument(shiftId: string) {
+  return `SHIFT:${shiftId}`;
+}
 
 type Tx = Prisma.TransactionClient;
 
@@ -251,6 +255,108 @@ export async function postExpenseJournal(
       description: `Expense — ${input.payee || expenseCode}`,
       source: "EXPENSE",
       lines,
+    },
+    tx,
+  );
+}
+
+/**
+ * Pump-shift sales: debit cash / card clearing / AR for tendered amounts,
+ * credit sales + output VAT for meter sales, and park over/short in P&L.
+ * sourceDocument is SHIFT:<shiftId> so updates can replace the entry.
+ */
+export async function postShiftSalesJournal(
+  stationId: string,
+  input: {
+    businessDate: string;
+    shiftId: string;
+    shiftName: string;
+    cashCentavos: bigint;
+    cardCentavos: bigint;
+    creditCentavos: bigint;
+    expectedSalesCentavos: bigint;
+    vatRegistered?: boolean;
+  },
+  tx: Tx | typeof prisma = prisma,
+) {
+  const expected = input.expectedSalesCentavos < 0n ? 0n : input.expectedSalesCentavos;
+  const cash = input.cashCentavos < 0n ? 0n : input.cashCentavos;
+  const card = input.cardCentavos < 0n ? 0n : input.cardCentavos;
+  const credit = input.creditCentavos < 0n ? 0n : input.creditCentavos;
+  if (expected === 0n && cash === 0n && card === 0n && credit === 0n) {
+    return null;
+  }
+
+  const tendered = cash + card + credit;
+  const difference = tendered - expected;
+  const split =
+    input.vatRegistered === false || expected === 0n
+      ? { netCentavos: expected, vatCentavos: 0n }
+      : splitInclusiveVat(expected);
+
+  const lines: JournalLineInput[] = [];
+  if (cash > 0n) lines.push({ code: "1000", debitCentavos: cash, memo: "Cash counted" });
+  if (card > 0n) lines.push({ code: "1030", debitCentavos: card, memo: "Card / e-wallet" });
+  if (credit > 0n) lines.push({ code: "1100", debitCentavos: credit, memo: "Charge sales" });
+  if (difference < 0n) {
+    lines.push({ code: "7200", debitCentavos: -difference, memo: "Cash short" });
+  }
+  if (split.netCentavos > 0n) {
+    lines.push({ code: "4030", creditCentavos: split.netCentavos, memo: "Shift sales" });
+  }
+  if (split.vatCentavos > 0n) {
+    lines.push({ code: "2040", creditCentavos: split.vatCentavos, memo: "Output VAT" });
+  }
+  if (difference > 0n) {
+    lines.push({ code: "4040", creditCentavos: difference, memo: "Cash over" });
+  }
+
+  return postJournalEntry(
+    stationId,
+    {
+      businessDate: input.businessDate,
+      description: `${input.shiftName} shift sales`,
+      source: "SALE",
+      sourceDocument: shiftJournalSourceDocument(input.shiftId),
+      lines,
+    },
+    tx,
+  );
+}
+
+export async function removeJournalsBySourceDocument(
+  stationId: string,
+  sourceDocument: string,
+  tx: Tx | typeof prisma = prisma,
+) {
+  const entries = await tx.journalEntry.findMany({
+    where: { stationId, sourceDocument },
+    select: { id: true },
+  });
+  for (const entry of entries) {
+    await tx.journalLine.deleteMany({ where: { entryId: entry.id } });
+    await tx.journalEntry.delete({ where: { id: entry.id } });
+  }
+}
+
+/** Opening float / capital so cash expenses have cash to draw from. */
+export async function postOpeningCashJournal(
+  stationId: string,
+  input: { businessDate: string; cashCentavos: bigint; note?: string },
+  tx: Tx | typeof prisma = prisma,
+) {
+  if (input.cashCentavos <= 0n) return null;
+  return postJournalEntry(
+    stationId,
+    {
+      businessDate: input.businessDate,
+      description: input.note ?? "Opening cash on hand",
+      source: "OPENING",
+      sourceDocument: "OPENING-CASH",
+      lines: [
+        { code: "1000", debitCentavos: input.cashCentavos, memo: "Opening cash" },
+        { code: "3000", creditCentavos: input.cashCentavos, memo: "Owner's capital" },
+      ],
     },
     tx,
   );

@@ -363,4 +363,97 @@ describe("station API", () => {
     expect(tb.body.rows.some((row: { code: string }) => row.code === "4030")).toBe(true);
     expect(tb.body.rows.some((row: { code: string }) => row.code === "2040")).toBe(true);
   });
+
+  it("keeps cash and AR on the debit side after shift sales, expenses, and collections", async () => {
+    const agent = await signUp();
+    const station = await setupStation(agent);
+    const diesel = station.pumps.find((pump) => pump.name === "Pump 1")!;
+    const unleaded = station.pumps.find((pump) => pump.name === "Pump 2")!;
+    const today = manilaToday();
+
+    const opening = await agent.post("/api/books/journal").send({
+      businessDate: today,
+      description: "Opening cash on hand",
+      sourceDocument: "OPENING-CASH",
+      lines: [
+        { code: "1000", debit: "10000.00", credit: "0" },
+        { code: "3000", debit: "0", credit: "10000.00" },
+      ],
+    });
+    expect(opening.status, JSON.stringify(opening.body)).toBe(201);
+
+    const customer = await agent.post("/api/customers").send({
+      name: "Fleet Co",
+      type: "ORGANIZATION",
+      allowsCharge: true,
+      creditLimit: "5000.00",
+      paymentTermsDays: 30,
+    });
+    expect(customer.status, JSON.stringify(customer.body)).toBe(201);
+
+    const shift = await agent.post("/api/shifts").send({
+      businessDate: today,
+      name: "Morning",
+      cash: "4500.00",
+      card: "585.00",
+      credit: "500.00",
+      readings: [
+        { pumpId: diesel.id, opening: "1000.00", closing: "1100.00", price: "55.85" },
+        { pumpId: unleaded.id, opening: "2000.00", closing: "2000.00", price: "61.40" },
+      ],
+      charges: [{ customerId: customer.body.id, amount: "500.00", note: "On account" }],
+    });
+    expect(shift.status, JSON.stringify(shift.body)).toBe(201);
+    // 100 L diesel @ 55.85 = ₱5,585.00
+    expect(shift.body.expectedCentavos).toBe("558500");
+
+    const expense = await agent.post("/api/expenses").send({
+      businessDate: today,
+      category: "Supplies",
+      amount: "250.00",
+      payee: "Trading",
+      note: "Receipt rolls",
+    });
+    expect(expense.status, JSON.stringify(expense.body)).toBe(201);
+
+    const collection = await agent.post(`/api/customers/${customer.body.id}/payments`).send({
+      businessDate: today,
+      amount: "200.00",
+      note: "Partial collection",
+    });
+    expect(collection.status, JSON.stringify(collection.body)).toBe(201);
+
+    const tb = await agent.get("/api/books/trial-balance");
+    expect(tb.status).toBe(200);
+    expect(tb.body.balanced).toBe(true);
+    expect(BigInt(tb.body.totalDebitCentavos)).toBe(BigInt(tb.body.totalCreditCentavos));
+
+    const byCode = Object.fromEntries(
+      (tb.body.rows as { code: string; type: string; debitCentavos: string; creditCentavos: string }[]).map(
+        (row) => [row.code, row],
+      ),
+    );
+
+    // Cash: opening 10,000 + shift cash 4,500 + collection 200 - expense 250 = 14,450 debit
+    expect(byCode["1000"].debitCentavos).toBe("1445000");
+    expect(byCode["1000"].creditCentavos).toBe("0");
+    // AR: charge 500 - collection 200 = 300 debit
+    expect(byCode["1100"].debitCentavos).toBe("30000");
+    expect(byCode["1100"].creditCentavos).toBe("0");
+
+    for (const row of tb.body.rows as { code: string; type: string; debitCentavos: string; creditCentavos: string }[]) {
+      if (row.type === "ASSET") {
+        expect(BigInt(row.creditCentavos), `asset ${row.code} should not credit`).toBe(0n);
+      }
+      if (row.type === "REVENUE") {
+        expect(BigInt(row.debitCentavos), `revenue ${row.code} should not debit`).toBe(0n);
+      }
+      if (row.type === "EXPENSE") {
+        expect(BigInt(row.creditCentavos), `expense ${row.code} should not credit`).toBe(0n);
+      }
+      if (row.type === "LIABILITY" || row.type === "EQUITY") {
+        expect(BigInt(row.debitCentavos), `${row.type} ${row.code} should not debit`).toBe(0n);
+      }
+    }
+  });
 });

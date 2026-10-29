@@ -6,7 +6,14 @@ import {
   taxBreakdown,
 } from "@nines/shared";
 import { auth } from "../src/auth";
-import { ensureChartOfAccounts, postCollectionJournal, postExpenseJournal, postSaleJournal } from "../src/books";
+import {
+  ensureChartOfAccounts,
+  postCollectionJournal,
+  postExpenseJournal,
+  postOpeningCashJournal,
+  postSaleJournal,
+  postShiftSalesJournal,
+} from "../src/books";
 import { prisma } from "../src/prisma";
 
 const DEMO_EMAIL = "demo@nines.local";
@@ -79,6 +86,12 @@ async function seedFuelDemo() {
     },
   });
   await ensureChartOfAccounts(station.id, true);
+  // Opening cashier float so expense credits to cash do not flip the account.
+  await postOpeningCashJournal(station.id, {
+    businessDate: addDays(today, -14),
+    cashCentavos: 2_500_000n, // ₱25,000
+    note: "Opening cash on hand",
+  });
 
   const products = new Map<string, { id: string; price: bigint }>();
   for (const [index, product] of PRODUCT_PRICES.entries()) {
@@ -263,6 +276,17 @@ async function seedFuelDemo() {
           notes: short ? "Cashier counted the drawer twice." : "",
           readings: { create: readings },
         },
+      });
+
+      await postShiftSalesJournal(station.id, {
+        businessDate: addDays(today, -age),
+        shiftId: created.id,
+        shiftName: shift.name,
+        cashCentavos: cash,
+        cardCentavos: card,
+        creditCentavos: credit,
+        expectedSalesCentavos: expected,
+        vatRegistered: true,
       });
 
       if (age === 0 && shift.name === "Morning") {
@@ -596,6 +620,11 @@ async function seedShopDemo() {
     },
   });
   await ensureChartOfAccounts(station.id, false);
+  await postOpeningCashJournal(station.id, {
+    businessDate: addDays(today, -7),
+    cashCentavos: 500_000n, // ₱5,000
+    note: "Opening cash on hand",
+  });
 
   const rice = await prisma.item.create({
     data: {

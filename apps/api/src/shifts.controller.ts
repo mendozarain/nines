@@ -1,6 +1,11 @@
 import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from "@nestjs/common";
 import { litresSold, litresToAmountCentavos, overShort, type ShiftName } from "@nines/shared";
 import type { AuthUser } from "./auth";
+import {
+  postShiftSalesJournal,
+  removeJournalsBySourceDocument,
+  shiftJournalSourceDocument,
+} from "./books";
 import { AuthGuard, cents, CurrentUser, dateOnly, dayString, notFound, parseBody, stationFor } from "./common";
 import { prisma } from "./prisma";
 import { rangeQuerySchema, shiftSchema } from "./schemas";
@@ -211,11 +216,11 @@ export class ShiftsController {
   async create(@CurrentUser() user: AuthUser, @Body() body: unknown) {
     const station = await stationFor(user.id);
     const input = parseBody(shiftSchema, body);
-    const { readingRows } = await buildRows(station.id, input);
+    const { readingRows, expected } = await buildRows(station.id, input);
     const businessDate = dateOnly(input.businessDate);
     const shift = await prisma.$transaction(async (tx) => {
       const charges = await chargeRows(tx, station.id, input, businessDate);
-      return tx.shift.create({
+      const created = await tx.shift.create({
         data: {
           stationId: station.id,
           businessDate,
@@ -230,6 +235,21 @@ export class ShiftsController {
         },
         include: shiftInclude,
       });
+      await postShiftSalesJournal(
+        station.id,
+        {
+          businessDate: input.businessDate,
+          shiftId: created.id,
+          shiftName: input.name,
+          cashCentavos: input.cash,
+          cardCentavos: input.card,
+          creditCentavos: input.credit,
+          expectedSalesCentavos: expected,
+          vatRegistered: station.vatRegistered,
+        },
+        tx,
+      );
+      return created;
     });
     return serializeShift(shift);
   }
@@ -240,13 +260,14 @@ export class ShiftsController {
     const existing = await prisma.shift.findFirst({ where: { id, stationId: station.id } });
     if (!existing) notFound("That shift was not found.");
     const input = parseBody(shiftSchema, body);
-    const { readingRows } = await buildRows(station.id, input, id);
+    const { readingRows, expected } = await buildRows(station.id, input, id);
     const businessDate = dateOnly(input.businessDate);
     const shift = await prisma.$transaction(async (tx) => {
+      await removeJournalsBySourceDocument(station.id, shiftJournalSourceDocument(id), tx);
       await tx.shiftReading.deleteMany({ where: { shiftId: id } });
       await tx.creditCharge.deleteMany({ where: { shiftId: id } });
       const charges = await chargeRows(tx, station.id, input, businessDate);
-      return tx.shift.update({
+      const updated = await tx.shift.update({
         where: { id },
         data: {
           businessDate,
@@ -261,6 +282,21 @@ export class ShiftsController {
         },
         include: shiftInclude,
       });
+      await postShiftSalesJournal(
+        station.id,
+        {
+          businessDate: input.businessDate,
+          shiftId: updated.id,
+          shiftName: input.name,
+          cashCentavos: input.cash,
+          cardCentavos: input.card,
+          creditCentavos: input.credit,
+          expectedSalesCentavos: expected,
+          vatRegistered: station.vatRegistered,
+        },
+        tx,
+      );
+      return updated;
     });
     return serializeShift(shift);
   }
@@ -270,7 +306,10 @@ export class ShiftsController {
     const station = await stationFor(user.id);
     const existing = await prisma.shift.findFirst({ where: { id, stationId: station.id } });
     if (!existing) notFound("That shift was not found.");
-    await prisma.shift.delete({ where: { id } });
+    await prisma.$transaction(async (tx) => {
+      await removeJournalsBySourceDocument(station.id, shiftJournalSourceDocument(id), tx);
+      await tx.shift.delete({ where: { id } });
+    });
     return { ok: true };
   }
 }
