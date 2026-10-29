@@ -62,8 +62,8 @@ export function StatCard({
 }) {
   const body = (
     <>
-      <p className="text-[12px] font-medium text-muted-foreground">{label}</p>
-      <p className="mt-2 text-[24px] font-bold tracking-[-0.03em] tabular-nums" data-testid={testId}>
+      <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">{label}</p>
+      <p className="mt-2 text-[26px] font-bold tracking-[-0.04em] tabular-nums" data-testid={testId}>
         {value}
       </p>
       {hint ? <p className="mt-1 text-[12px] text-muted-foreground">{hint}</p> : null}

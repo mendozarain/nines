@@ -1,6 +1,6 @@
 import { Link, useOutletContext } from "react-router";
 import { describeOverShort, formatCentavos, formatDate, formatMonth } from "@nines/shared";
-import { EmptyState, LoadingBlock, PageHeader, StatCard } from "~/components/page";
+import { EmptyState, LoadingBlock, StatCard } from "~/components/page";
 import { Button } from "~/components/ui/button";
 import { useFetch } from "~/lib/use-fetch";
 import type { Dashboard, Me } from "~/lib/types";
@@ -15,29 +15,46 @@ function fuelEnabled(me: Me) {
   return me.station.industry === "FUEL_STATION" || me.station.industry == null;
 }
 
+function greetingName(name: string) {
+  const first = name.trim().split(/\s+/)[0];
+  return first || "there";
+}
+
+function timeGreeting() {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good morning";
+  if (hour < 18) return "Good afternoon";
+  return "Good evening";
+}
+
 export default function DashboardPage() {
   const me = useOutletContext<Me>();
   const fuel = fuelEnabled(me);
   const { data, error, loading } = useFetch<Dashboard>("/api/dashboard");
+  const hello = `${timeGreeting()}, ${greetingName(me.user?.name ?? "")}`;
 
   return (
     <div className="grid gap-6">
-      <PageHeader
-        title="Dashboard"
-        description={me.station ? `${me.station.name}${data ? ` · ${formatDate(data.today)}` : ""}` : ""}
-        action={
-          <>
-            <Button asChild variant="outline">
-              {fuel ? <Link to="/shifts/new">Record a shift</Link> : <Link to="/cash">Close the day</Link>}
-            </Button>
-            <Button asChild>
-              <Link to="/sales/new">Create invoice</Link>
-            </Button>
-          </>
-        }
-      />
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="grid gap-1">
+          <h1 className="text-[28px] font-bold leading-tight tracking-[-0.04em] text-foreground">{hello}</h1>
+          <p className="text-[14px] text-muted-foreground">
+            {me.station ? `${me.station.name}${data ? ` · ${formatDate(data.today)}` : ""}` : "Your books for today"}
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button asChild variant="outline">
+            {fuel ? <Link to="/shifts/new">Record a shift</Link> : <Link to="/cash">Close the day</Link>}
+          </Button>
+          <Button asChild>
+            <Link to="/sales/new">Create invoice</Link>
+          </Button>
+        </div>
+      </div>
+
       {loading ? <LoadingBlock /> : null}
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
+
       {data ? (
         <>
           <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -56,11 +73,12 @@ export default function DashboardPage() {
               href="/reports"
             />
           </section>
+
           <section className="grid gap-3 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
-            <div className="rounded-2xl border border-border/80 bg-card p-5">
+            <div className="rounded-2xl border border-border bg-card p-5">
               <div className="mb-5 flex items-baseline justify-between gap-3">
                 <h2 className="text-[15px] font-semibold tracking-[-0.02em]">Last 14 days</h2>
-                <p className="text-[12px] text-muted-foreground">Sales</p>
+                <p className="text-[12px] font-medium uppercase tracking-[0.06em] text-muted-foreground">Sales</p>
               </div>
               {data.series.every((point) => point.salesCentavos === "0") ? (
                 <EmptyState

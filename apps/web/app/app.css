@@ -3,8 +3,8 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
-  Ofacc+-inspired system (see DESIGN.md)
-  Canvas → white framed surface → accent #0066FF
+  Nines Design System — Ofacc+ (Figma Mt4SWTPaVSKfjeaZEP4Wjs)
+  See apps/web/DESIGN.md
 */
 :root {
   --radius: 0.625rem;
@@ -13,26 +13,26 @@
   --font-display: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
 
   --background: #f3f5f7;
-  --foreground: #111827;
+  --foreground: #111111;
   --card: #ffffff;
-  --card-foreground: #111827;
+  --card-foreground: #111111;
   --popover: #ffffff;
-  --popover-foreground: #111827;
-  --primary: #0066ff;
+  --popover-foreground: #111111;
+  --primary: #0094ff;
   --primary-foreground: #ffffff;
   --secondary: #f3f4f6;
-  --secondary-foreground: #111827;
+  --secondary-foreground: #111111;
   --muted: #f3f4f6;
   --muted-foreground: #6b7280;
   --accent: #f3f4f6;
-  --accent-foreground: #111827;
+  --accent-foreground: #111111;
   --destructive: #dc2626;
-  --border: #e5e7eb;
-  --input: #e5e7eb;
-  --ring: #0066ff;
+  --border: #e5e5e5;
+  --input: #e5e5e5;
+  --ring: #0094ff;
   --sidebar: #ffffff;
   --sidebar-foreground: #6b7280;
-  --chart: #0066ff;
+  --chart: #0094ff;
   --surface-hover: #f3f4f6;
   --success-bg: #ecfdf5;
   --success-fg: #065f46;
@@ -40,6 +40,7 @@
   --warning-fg: #9f1239;
   --neutral-bg: #f3f4f6;
   --neutral-fg: #374151;
+  --accent-soft: #d3e3fd;
   --frame-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 12px 32px rgba(16, 24, 40, 0.06);
 }
 
@@ -50,7 +51,7 @@
   --card-foreground: #f9fafb;
   --popover: #171a21;
   --popover-foreground: #f9fafb;
-  --primary: #3b82f6;
+  --primary: #0a84ff;
   --primary-foreground: #ffffff;
   --secondary: #1f2430;
   --secondary-foreground: #f9fafb;
@@ -61,11 +62,12 @@
   --destructive: #f87171;
   --border: #2a3140;
   --input: #2a3140;
-  --ring: #3b82f6;
+  --ring: #0a84ff;
   --sidebar: #141821;
   --sidebar-foreground: #9ca3af;
-  --chart: #60a5fa;
+  --chart: #0a84ff;
   --surface-hover: #1f2430;
+  --accent-soft: #1e3a5f;
   --success-bg: #052e1c;
   --success-fg: #6ee7b7;
   --warning-bg: #3f0d1a;
@@ -111,6 +113,7 @@
   --color-warning-fg: var(--warning-fg);
   --color-neutral-bg: var(--neutral-bg);
   --color-neutral-fg: var(--neutral-fg);
+  --color-accent-soft: var(--accent-soft);
 }
 
 @layer base {

@@ -37,7 +37,7 @@ export function SidebarGroup({
               cn(
                 "flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-[13.5px] font-medium transition-colors",
                 isActive
-                  ? "bg-surface-hover text-foreground"
+                  ? "bg-accent-soft/70 text-foreground"
                   : "text-sidebar-foreground hover:bg-surface-hover/70 hover:text-foreground",
               )
             }

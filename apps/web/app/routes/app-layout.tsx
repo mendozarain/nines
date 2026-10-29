@@ -1,5 +1,5 @@
 /**
- * Ofacc+-inspired shell. Tokens + rules: apps/web/DESIGN.md
+ * Shell from Figma Nines Design System — Ofacc+. See apps/web/DESIGN.md
  */
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
