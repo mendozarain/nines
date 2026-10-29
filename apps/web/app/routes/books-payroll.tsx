@@ -101,7 +101,7 @@ export default function BooksPayrollPage() {
       {data && data.entries.length === 0 ? <EmptyState title="No payroll entries yet" description="Record pay when you run payroll for the period." /> : null}
       <div className="grid gap-2">
         {data?.entries.map((entry) => (
-          <div key={entry.id} className="rounded-xl border bg-card/80 p-4 sm:flex sm:justify-between">
+          <div key={entry.id} className="nines-row sm:flex sm:justify-between">
             <div>
               <p className="font-medium">
                 {entry.employeeName} · {formatDate(entry.businessDate)}

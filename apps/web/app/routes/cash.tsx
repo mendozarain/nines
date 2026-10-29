@@ -109,7 +109,7 @@ export default function CashPage() {
       ) : null}
       <div className="grid gap-2">
         {data?.reconciliations.map((row) => (
-          <div key={row.id} className="rounded-xl border bg-card/80 p-4 sm:flex sm:items-center sm:justify-between">
+          <div key={row.id} className="nines-row sm:flex sm:items-center sm:justify-between">
             <div>
               <p className="font-medium">
                 {formatDate(row.businessDate)} · {row.shiftName || "Day"}

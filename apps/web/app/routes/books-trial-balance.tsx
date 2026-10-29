@@ -26,7 +26,7 @@ export default function BooksTrialBalancePage() {
         <EmptyState title="Nothing to show yet" description="Once journal activity exists, balances appear here." />
       ) : null}
       {data && data.rows.length > 0 ? (
-        <div className="overflow-x-auto rounded-xl border bg-card/80">
+        <div className="nines-panel overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b text-left text-muted-foreground">

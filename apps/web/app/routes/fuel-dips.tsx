@@ -107,7 +107,7 @@ export default function FuelDipsPage() {
         {data?.dips.map((dip) => {
           const variance = BigInt(dip.physicalCentilitres) - BigInt(dip.bookClosingCentilitres);
           return (
-            <div key={dip.id} className="rounded-xl border bg-card/80 p-4">
+            <div key={dip.id} className="nines-row">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <p className="font-medium">
                   {formatDate(dip.businessDate)} · {dip.tankName || dip.tankId}

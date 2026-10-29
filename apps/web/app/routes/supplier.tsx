@@ -153,7 +153,7 @@ export default function SupplierPage() {
         <h2 className="font-medium">Bills</h2>
         {data.bills.length === 0 ? <p className="text-sm text-muted-foreground">No bills yet.</p> : null}
         {data.bills.map((bill) => (
-          <div key={bill.id} className="flex items-center justify-between gap-3 rounded-xl border bg-card p-4">
+          <div key={bill.id} className="flex items-center justify-between gap-3 nines-row">
             <div>
               <p className="font-medium">{bill.reference || "Bill"}</p>
               <p className="text-sm text-muted-foreground">
@@ -175,7 +175,7 @@ export default function SupplierPage() {
         <h2 className="font-medium">Payments</h2>
         {data.payments.length === 0 ? <p className="text-sm text-muted-foreground">No payments yet.</p> : null}
         {data.payments.map((payment) => (
-          <div key={payment.id} className="flex items-center justify-between gap-3 rounded-xl border bg-card p-4">
+          <div key={payment.id} className="flex items-center justify-between gap-3 nines-row">
             <div>
               <p>{formatDate(payment.businessDate)}</p>
               <p className="text-sm text-muted-foreground">{payment.note || "Payment"}</p>

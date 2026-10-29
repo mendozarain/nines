@@ -115,7 +115,7 @@ export default function CustomerPage() {
               ["90+", aging["90+"] ?? aging.over90Centavos ?? "0"],
             ] as const
           ).map(([label, value]) => (
-            <div key={label} className="rounded-xl border bg-card/80 p-3">
+            <div key={label} className="nines-row">
               <p className="text-xs text-muted-foreground">{label}</p>
               <p className="mt-1 font-semibold tabular-nums">{formatCentavos(value || "0")}</p>
             </div>
@@ -181,7 +181,7 @@ export default function CustomerPage() {
         <h2 className="font-medium">Charges</h2>
         {data.charges.length === 0 ? <p className="text-sm text-muted-foreground">No charges yet.</p> : null}
         {data.charges.map((charge) => (
-          <div key={charge.id} className="rounded-xl border bg-card/80 p-4">
+          <div key={charge.id} className="nines-row">
             <div className="flex items-center justify-between gap-3">
               <p>{formatDate(charge.businessDate)}</p>
               <Money value={charge.amountCentavos} className="font-semibold" />
@@ -207,7 +207,7 @@ export default function CustomerPage() {
         <h2 className="font-medium">Collections</h2>
         {data.payments.length === 0 ? <p className="text-sm text-muted-foreground">No payments yet.</p> : null}
         {data.payments.map((payment) => (
-          <div key={payment.id} className="flex items-center justify-between gap-3 rounded-xl border bg-card/80 p-4">
+          <div key={payment.id} className="flex items-center justify-between gap-3 nines-row">
             <div>
               <p>{formatDate(payment.businessDate)}</p>
               <p className="text-sm text-muted-foreground">
@@ -229,7 +229,7 @@ export default function CustomerPage() {
       </section>
       {statement ? (
         <section className="rounded-lg border bg-card p-4 print:border-0">
-          <h2 className="font-display text-xl font-semibold">Statement of account</h2>
+          <h2 className="text-lg font-semibold tracking-tight">Statement of account</h2>
           <p className="text-sm text-muted-foreground">
             {statement.customer.name} · as of {formatDate(statement.asOf)}
           </p>

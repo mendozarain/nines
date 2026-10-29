@@ -89,7 +89,7 @@ export default function ItemsPage() {
       ) : null}
       <div className="grid gap-2">
         {data?.items.map((item) => (
-          <div key={item.id} className="flex flex-col gap-1 rounded-xl border bg-card/80 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div key={item.id} className="flex flex-col gap-1 nines-row sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="font-medium">{item.name}</p>
               <p className="text-sm text-muted-foreground">

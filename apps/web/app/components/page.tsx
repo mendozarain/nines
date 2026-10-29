@@ -16,10 +16,10 @@ export function PageHeader({
   action?: ReactNode;
 }) {
   return (
-    <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div className="grid gap-1">
-        <h1 className="font-display text-2xl font-semibold tracking-tight">{title}</h1>
-        {description ? <p className="max-w-2xl text-sm text-muted-foreground">{description}</p> : null}
+        <h1 className="text-[28px] font-semibold leading-tight tracking-[-0.035em] text-foreground">{title}</h1>
+        {description ? <p className="max-w-2xl text-[14px] leading-relaxed text-muted-foreground">{description}</p> : null}
       </div>
       {action}
     </div>
@@ -62,24 +62,28 @@ export function StatCard({
 }) {
   const body = (
     <>
-      <p className="text-sm text-muted-foreground">{label}</p>
-      <p className="mt-1 text-2xl font-semibold tabular-nums" data-testid={testId}>
+      <p className="text-[12px] font-medium text-muted-foreground">{label}</p>
+      <p className="mt-1.5 text-[26px] font-semibold tracking-[-0.03em] tabular-nums" data-testid={testId}>
         {value}
       </p>
-      {hint ? <p className="mt-1 text-sm text-muted-foreground">{hint}</p> : null}
+      {hint ? <p className="mt-1 text-[12px] text-muted-foreground">{hint}</p> : null}
     </>
   );
-  const className = "rounded-xl border border-border/70 bg-card/80 p-4 shadow-sm transition-colors hover:bg-accent/40";
   if (href) {
     return (
-      <Link to={href} className={className}>
+      <Link to={href} className="nines-metric">
         {body}
       </Link>
     );
   }
-  return <div className={className}>{body}</div>;
+  return <div className="nines-metric">{body}</div>;
 }
 
 export function LoadingBlock({ label = "Loading…" }: { label?: string }) {
-  return <p className="text-sm text-muted-foreground">{label}</p>;
+  return (
+    <div className="flex items-center gap-2 text-[14px] text-muted-foreground" role="status">
+      <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-muted-foreground/50" />
+      {label}
+    </div>
+  );
 }

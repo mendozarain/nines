@@ -113,7 +113,7 @@ export default function FuelDeliveriesPage() {
       ) : null}
       <div className="grid gap-2">
         {data?.deliveries.map((delivery) => (
-          <div key={delivery.id} className="rounded-xl border bg-card/80 p-4">
+          <div key={delivery.id} className="nines-row">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="font-medium">
                 {formatDate(delivery.businessDate)} · {delivery.tankName || delivery.tankId}

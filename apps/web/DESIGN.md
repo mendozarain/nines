@@ -1,12 +1,25 @@
-# Nines web design borrowings
+# Nines web design
 
-Short notes on visual and interaction inspiration (not a copy of any product).
+Direction: **Apple-calm product UI** — soft canvas, white surfaces, large type, almost no chrome.
 
-- **Linear** — dense, calm sidebar with clear groups; Cmd/Ctrl-K command palette for primary jumps and actions.
-- **Stripe Dashboard** — KPI cards with plain labels, tabular numbers, and quiet hierarchy.
-- **Xero / QuickBooks** — guided onboarding in plain language; one job per step.
-- **Mercury** — refined banking calm: soft gray-blue atmosphere, restrained borders, no noisy chrome.
-- **Vercel** — typography and spacing discipline; generous whitespace without emptiness.
-- **shadcn/ui blocks** — composable primitives (dialog, button, card, switch) as the interaction layer.
+## Inspiration
 
-Direction: deep teal / forest primary on soft gray-blue gradients. Dark mode required. Avoid purple-on-white, cream+terracotta serif, and broadsheet layouts.
+Mobbin MCP was unavailable (paid plan on the connected account). The redesign follows
+finance/product patterns Mobbin typically surfaces for Apple-like tools:
+
+- Soft gray page canvas with white content tiles (Apple Music / Settings web feel)
+- Large tracking-tight titles, quiet secondary copy
+- Sidebar owns brand + nav; content owns one job
+- System-blue primary actions; ink text; hairline separators only when needed
+- Linear Cmd/Ctrl-K for jumps; Stripe-style metrics without heavy borders
+
+## Rules in this codebase
+
+- One sans: `Plus Jakarta Sans`
+- Soft `--background`, white `--card` tiles (`rounded-2xl`)
+- Primary is blue (actions), not decorative teal gradients
+- Prefer `nines-row` / `nines-panel` over bordered shadow cards
+- No page gradients, glassmorphism stacks, or serif display fonts
+- Dark mode supported; light is the product default
+
+Avoid: purple themes, cream + terracotta serif, broadsheet layouts, multi-layer shadows, emoji.

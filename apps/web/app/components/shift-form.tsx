@@ -409,7 +409,7 @@ export function ShiftForm({ shiftId }: { shiftId?: string }) {
               id="notes"
               value={notes}
               onChange={(event) => setNotes(event.target.value)}
-              className="min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm"
+              className="min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
             />
           </Field>
         </CardContent>

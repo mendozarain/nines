@@ -2,7 +2,6 @@ import { Link, useOutletContext } from "react-router";
 import { describeOverShort, formatCentavos, formatDate, formatMonth } from "@nines/shared";
 import { EmptyState, LoadingBlock, PageHeader, StatCard } from "~/components/page";
 import { Button } from "~/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { useFetch } from "~/lib/use-fetch";
 import type { Dashboard, Me } from "~/lib/types";
 
@@ -22,21 +21,21 @@ export default function DashboardPage() {
   const { data, error, loading } = useFetch<Dashboard>("/api/dashboard");
 
   return (
-    <div className="grid gap-6">
+    <div className="grid gap-8">
       <PageHeader
         title="Dashboard"
         description={me.station ? `${me.station.name}${data ? ` · ${formatDate(data.today)}` : ""}` : ""}
         action={
           <div className="flex flex-wrap gap-2">
-            <Button asChild size="lg">
+            <Button asChild>
               <Link to="/sales/new">New sale</Link>
             </Button>
             {fuel ? (
-              <Button asChild variant="outline">
+              <Button asChild variant="secondary">
                 <Link to="/shifts/new">Record a shift</Link>
               </Button>
             ) : (
-              <Button asChild variant="outline">
+              <Button asChild variant="secondary">
                 <Link to="/cash">Close the day</Link>
               </Button>
             )}
@@ -48,52 +47,68 @@ export default function DashboardPage() {
       {data ? (
         <>
           <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <StatCard label="Today’s sales" value={formatCentavos(data.todaySalesCentavos)} href="/sales" testId="today-sales" />
-            <StatCard label="Today’s expenses" value={formatCentavos(data.todayExpensesCentavos)} href="/expenses" testId="today-expenses" />
-            <StatCard
-              label="Today’s cash"
-              value={describeOverShort(data.todayOverShortCentavos).label}
-              hint={fuel ? "Compared with pump sales" : "From cash reconciliation"}
-              testId="today-over-short"
-            />
-            <StatCard
-              label={data.vatRegistered ? "Output VAT this month" : "Tax this month"}
-              value={data.vatRegistered ? formatCentavos(data.monthOutputVatCentavos) : "Percentage tax"}
-              hint={formatMonth(data.month)}
-              href="/reports"
-            />
-          </section>
-          <section className="grid gap-3 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-            <Card className="border-border/70 bg-card/80 shadow-sm">
-              <CardHeader>
-                <CardTitle className="text-base font-medium">Last 14 days of sales</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {data.series.every((point) => point.salesCentavos === "0") ? (
-                  <EmptyState
-                    title="No sales in the last two weeks"
-                    description="Record a sale or a shift, and the days will show up here."
-                    action={
-                      <Button asChild>
-                        <Link to="/sales/new">New sale</Link>
-                      </Button>
-                    }
-                  />
-                ) : (
-                  <SalesChart series={data.series} />
-                )}
-              </CardContent>
-            </Card>
-            <div className="grid gap-3">
-              <StatCard label={`${formatMonth(data.month)} sales`} value={formatCentavos(data.monthSalesCentavos)} href="/reports" />
-              <StatCard label={`${formatMonth(data.month)} expenses`} value={formatCentavos(data.monthExpensesCentavos)} href="/expenses" />
+            <div className="rounded-2xl bg-card p-5">
+              <StatCard label="Today’s sales" value={formatCentavos(data.todaySalesCentavos)} href="/sales" testId="today-sales" />
+            </div>
+            <div className="rounded-2xl bg-card p-5">
+              <StatCard label="Today’s expenses" value={formatCentavos(data.todayExpensesCentavos)} href="/expenses" testId="today-expenses" />
+            </div>
+            <div className="rounded-2xl bg-card p-5">
               <StatCard
-                label="Customers still owe"
-                value={formatCentavos(data.receivablesCentavos)}
-                href="/customers"
-                hint="Charges minus collections"
+                label="Today’s cash"
+                value={describeOverShort(data.todayOverShortCentavos).label}
+                hint={fuel ? "Compared with pump sales" : "From cash reconciliation"}
+                testId="today-over-short"
               />
-              <StatCard label="Bills still to pay" value={formatCentavos(data.payablesCentavos)} href="/payables" hint="Supplier bills minus payments" />
+            </div>
+            <div className="rounded-2xl bg-card p-5">
+              <StatCard
+                label={data.vatRegistered ? "Output VAT this month" : "Tax this month"}
+                value={data.vatRegistered ? formatCentavos(data.monthOutputVatCentavos) : "Percentage tax"}
+                hint={formatMonth(data.month)}
+                href="/reports"
+              />
+            </div>
+          </section>
+          <section className="grid gap-3 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+            <div className="rounded-2xl bg-card p-5">
+              <div className="mb-5 flex items-baseline justify-between gap-3">
+                <h2 className="text-[15px] font-semibold tracking-[-0.02em]">Last 14 days</h2>
+                <p className="text-[12px] text-muted-foreground">Sales</p>
+              </div>
+              {data.series.every((point) => point.salesCentavos === "0") ? (
+                <EmptyState
+                  className="bg-transparent px-0 py-10"
+                  title="No sales in the last two weeks"
+                  description="Record a sale or a shift, and the days will show up here."
+                  action={
+                    <Button asChild>
+                      <Link to="/sales/new">New sale</Link>
+                    </Button>
+                  }
+                />
+              ) : (
+                <SalesChart series={data.series} />
+              )}
+            </div>
+            <div className="grid gap-3">
+              <div className="rounded-2xl bg-card p-5">
+                <StatCard label={`${formatMonth(data.month)} sales`} value={formatCentavos(data.monthSalesCentavos)} href="/reports" />
+              </div>
+              <div className="rounded-2xl bg-card p-5">
+                <StatCard label={`${formatMonth(data.month)} expenses`} value={formatCentavos(data.monthExpensesCentavos)} href="/expenses" />
+              </div>
+              <div className="rounded-2xl bg-card p-5">
+                <StatCard
+                  label="Customers still owe"
+                  value={formatCentavos(data.receivablesCentavos)}
+                  href="/customers"
+                  hint="Charges minus collections"
+                />
+              </div>
+              <div className="rounded-2xl bg-card p-5">
+                <StatCard label="Bills still to pay" value={formatCentavos(data.payablesCentavos)} href="/payables" hint="Supplier bills minus payments" />
+              </div>
             </div>
           </section>
         </>
@@ -115,36 +130,19 @@ function SalesChart({ series }: { series: Dashboard["series"] }) {
 
   return (
     <div>
-      <div className="relative h-48 w-full" aria-hidden="true">
+      <div className="relative h-44 w-full" aria-hidden="true">
         <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="h-full w-full overflow-visible">
           <defs>
             <linearGradient id="salesFill" x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0%" stopColor="var(--chart)" stopOpacity="0.35" />
+              <stop offset="0%" stopColor="var(--chart)" stopOpacity="0.22" />
               <stop offset="100%" stopColor="var(--chart)" stopOpacity="0.02" />
             </linearGradient>
           </defs>
           <polyline fill="url(#salesFill)" stroke="none" points={`0,100 ${points.join(" ")} 100,100`} />
-          <polyline fill="none" stroke="var(--chart)" strokeWidth="1.5" vectorEffect="non-scaling-stroke" points={points.join(" ")} />
+          <polyline fill="none" stroke="var(--chart)" strokeWidth="2" vectorEffect="non-scaling-stroke" points={points.join(" ")} />
         </svg>
-        <div className="pointer-events-none absolute inset-0 flex items-end gap-1 px-0.5">
-          {series.map((point) => {
-            const height = Number((BigInt(point.salesCentavos) * 1000n) / max) / 10;
-            return (
-              <div
-                key={point.date}
-                className="flex h-full flex-1 flex-col justify-end"
-                title={`${formatDate(point.date)} ${formatCentavos(point.salesCentavos)}`}
-              >
-                <div
-                  className="rounded-sm bg-chart/25"
-                  style={{ height: `${point.salesCentavos === "0" ? 0 : Math.max(height, 2)}%` }}
-                />
-              </div>
-            );
-          })}
-        </div>
       </div>
-      <div className="mt-2 flex justify-between text-xs text-muted-foreground">
+      <div className="mt-3 flex justify-between text-[12px] text-muted-foreground">
         <span>{formatDate(series[0]?.date ?? "")}</span>
         <span>{formatDate(series[series.length - 1]?.date ?? "")}</span>
       </div>

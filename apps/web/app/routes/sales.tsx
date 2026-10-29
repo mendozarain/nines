@@ -43,7 +43,7 @@ export default function SalesPage() {
           <Link
             key={invoice.id}
             to={`/sales/${invoice.id}`}
-            className="flex flex-col gap-1 rounded-xl border bg-card/80 p-4 transition-colors hover:bg-accent/30 sm:flex-row sm:items-center sm:justify-between"
+            className="flex flex-col gap-1 nines-row transition-colors sm:flex-row sm:items-center sm:justify-between"
           >
             <div>
               <p className="font-medium">

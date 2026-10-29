@@ -59,13 +59,13 @@ export default function Signup() {
         <Field label="Confirm password" htmlFor="confirm">
           <Input id="confirm" name="confirm" type="password" autoComplete="new-password" required />
         </Field>
-        <Button type="submit" size="lg" disabled={pending}>
+        <Button type="submit" size="lg" className="mt-1 w-full" disabled={pending}>
           {pending ? "Creating account…" : "Create account"}
         </Button>
       </form>
-      <p className="text-sm text-muted-foreground">
+      <p className="text-center text-[13px] text-muted-foreground">
         Already have an account?{" "}
-        <Link className="font-medium text-foreground underline-offset-4 hover:underline" to="/login">
+        <Link className="font-medium text-primary underline-offset-4 hover:underline" to="/login">
           Sign in
         </Link>
       </p>

@@ -75,7 +75,7 @@ export default function PayablesPage() {
       ) : null}
       <div className="grid gap-2">
         {data?.suppliers.map((supplier) => (
-          <Link key={supplier.id} to={`/payables/${supplier.id}`} className="flex flex-col gap-1 rounded-xl border bg-card p-4 hover:bg-accent/30 sm:flex-row sm:items-center sm:justify-between">
+          <Link key={supplier.id} to={`/payables/${supplier.id}`} className="flex flex-col gap-1 nines-row sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="font-medium">{supplier.name}</p>
               <p className="text-sm text-muted-foreground">{supplier.tin || "No TIN"}</p>

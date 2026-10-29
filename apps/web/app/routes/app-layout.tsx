@@ -1,7 +1,5 @@
 /**
- * Design borrowings: Linear (dense calm sidebar, Cmd-K), Stripe Dashboard (KPI clarity),
- * Xero/QB (guided start), Mercury (banking calm), Vercel (type/spacing), shadcn blocks.
- * Full notes: apps/web/DESIGN.md
+ * Shell: Apple-calm sidebar + content. Notes: apps/web/DESIGN.md
  */
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -102,32 +100,32 @@ function Nav({ me, onNavigate }: { me: Me; onNavigate?: () => void }) {
     { to: "/books/tax-calendar", label: "Tax calendar" },
   ];
 
-  const settings: SidebarLink[] = [{ to: "/station", label: "Business / station", icon: Settings }];
+  const settings: SidebarLink[] = [{ to: "/station", label: "Business", icon: Settings }];
 
   return (
-    <nav className="grid gap-3" aria-label="Main" data-sidebar>
+    <nav className="grid gap-0.5" aria-label="Main" data-sidebar>
       <NavLink
         to="/"
         end
         onClick={onNavigate}
         className={({ isActive }) =>
           cn(
-            "flex items-center gap-2 rounded-md px-2.5 py-1.5 text-sm",
-            isActive ? "bg-accent font-medium text-accent-foreground" : "text-muted-foreground hover:bg-accent/60 hover:text-foreground",
+            "flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] transition-colors",
+            isActive ? "bg-accent font-medium text-foreground" : "text-sidebar-foreground hover:bg-surface-hover hover:text-foreground",
           )
         }
       >
-        <LayoutDashboard className="h-4 w-4 opacity-70" />
+        <LayoutDashboard className="h-4 w-4 opacity-55" />
         Dashboard
       </NavLink>
-      <SidebarGroup label="Sales" icon={ShoppingCart} links={sales} onNavigate={onNavigate} />
-      <SidebarGroup label="Customers" icon={Users} links={customers} onNavigate={onNavigate} />
-      <SidebarGroup label={fuel ? "Inventory / Fuel" : "Inventory"} icon={Package} links={inventory} onNavigate={onNavigate} />
-      <SidebarGroup label="Cash" icon={Wallet} links={cash} onNavigate={onNavigate} />
-      <SidebarGroup label="Expenses & suppliers" icon={CircleDollarSign} links={expenses} onNavigate={onNavigate} />
-      <SidebarGroup label="Books" icon={BookOpen} links={books} onNavigate={onNavigate} />
-      <SidebarGroup label="Reports" icon={Receipt} links={reports} onNavigate={onNavigate} />
-      <SidebarGroup label="Settings" icon={Settings} links={settings} onNavigate={onNavigate} />
+      <SidebarGroup label="Sales" links={sales} onNavigate={onNavigate} />
+      <SidebarGroup label="Customers" links={customers} onNavigate={onNavigate} />
+      <SidebarGroup label="Inventory" links={inventory} onNavigate={onNavigate} />
+      <SidebarGroup label="Cash" links={cash} onNavigate={onNavigate} />
+      <SidebarGroup label="Expenses" links={expenses} onNavigate={onNavigate} />
+      <SidebarGroup label="Books" links={books} onNavigate={onNavigate} />
+      <SidebarGroup label="Reports" links={reports} onNavigate={onNavigate} />
+      <SidebarGroup label="Settings" links={settings} onNavigate={onNavigate} />
     </nav>
   );
 }
@@ -183,64 +181,96 @@ export default function AppLayout({ loaderData }: { loaderData: Me }) {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen md:grid md:grid-cols-[232px_minmax(0,1fr)]">
       <a
         href="#main"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-background focus:px-3 focus:py-2"
       >
         Skip to content
       </a>
-      <header className={cn("app-chrome sticky top-0 z-30 border-b bg-background/90 backdrop-blur print-hide", isDesktop && "nines-drag-region")}>
-        <div className="flex h-14 items-center gap-3 px-4">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className={cn("md:hidden", isDesktop && "nines-no-drag")}
-            aria-label="Open menu"
-            onClick={() => setMenuOpen(true)}
-          >
-            <Menu />
-          </Button>
-          <span className="font-display text-lg font-semibold tracking-tight">Nines</span>
-          <span className="hidden truncate text-sm text-muted-foreground sm:inline">{loaderData.station.name}</span>
-          <div className={cn("ml-auto flex items-center gap-1 sm:gap-2", isDesktop && "nines-no-drag")}>
-            <Button type="button" variant="outline" size="sm" className="hidden gap-2 sm:inline-flex" onClick={openPalette}>
-              <Search className="h-3.5 w-3.5" />
-              Search
-              <kbd className="rounded border bg-muted px-1.5 text-[10px] text-muted-foreground">⌘K</kbd>
-            </Button>
-            <Button type="button" variant="ghost" size="icon" className="sm:hidden" aria-label="Open command palette" onClick={openPalette}>
-              <Search />
-            </Button>
-            <ThemeToggle />
-            <span className="hidden text-sm text-muted-foreground lg:inline">{loaderData.user.name}</span>
-            <Button type="button" variant="ghost" size="sm" onClick={signOut}>
-              <LogOut />
-              <span className="hidden sm:inline">Sign out</span>
-            </Button>
-          </div>
+
+      <aside
+        className={cn(
+          "print-hide hidden min-h-screen flex-col bg-sidebar md:flex",
+          isDesktop && "nines-drag-region",
+        )}
+        data-sidebar
+      >
+        <div className={cn("px-5 pb-2 pt-6", isDesktop && "nines-no-drag")}>
+          <p className="text-[17px] font-semibold tracking-[-0.03em]">Nines</p>
+          <p className="mt-1 truncate text-[12px] text-muted-foreground">{loaderData.station.name}</p>
         </div>
-      </header>
-      {menuOpen ? (
-        <div className="fixed inset-0 z-40 print-hide md:hidden">
-          <button className="absolute inset-0 bg-black/40" aria-label="Close menu" onClick={() => setMenuOpen(false)} />
-          <div className="absolute left-0 top-0 flex h-full w-72 flex-col gap-4 overflow-y-auto bg-sidebar p-4 shadow-lg">
-            <div className="flex items-center justify-between">
-              <span className="font-display font-semibold">{loaderData.station.name}</span>
-              <Button type="button" variant="ghost" size="icon" aria-label="Close menu" onClick={() => setMenuOpen(false)}>
-                <X />
+        <div className={cn("min-h-0 flex-1 overflow-y-auto px-3 py-3", isDesktop && "nines-no-drag")}>
+          <Nav me={loaderData} />
+        </div>
+        <div className={cn("mt-auto px-3 pb-4 pt-2", isDesktop && "nines-no-drag")}>
+          <div className="rounded-xl bg-background/80 px-3 py-3">
+            <p className="truncate text-[12px] text-muted-foreground">{loaderData.user.name}</p>
+            <div className="mt-2 flex items-center gap-1">
+              <ThemeToggle />
+              <Button type="button" variant="ghost" size="sm" className="h-8 px-2 text-[12px]" onClick={signOut}>
+                <LogOut className="h-3.5 w-3.5" />
+                Sign out
               </Button>
             </div>
-            <Nav me={loaderData} onNavigate={() => setMenuOpen(false)} />
           </div>
         </div>
-      ) : null}
-      <div className="mx-auto grid max-w-7xl md:grid-cols-[220px_minmax(0,1fr)]">
-        <aside className="print-hide hidden min-h-[calc(100vh-3.5rem)] border-r bg-sidebar/80 p-3 md:block" data-sidebar>
-          <Nav me={loaderData} />
-        </aside>
-        <main id="main" className="px-4 py-6 md:px-6">
+      </aside>
+
+      <div className="flex min-w-0 flex-col">
+        <header className={cn("app-chrome sticky top-0 z-30 bg-background/80 backdrop-blur-xl print-hide md:hidden", isDesktop && "nines-drag-region")}>
+          <div className="flex h-12 items-center gap-2 px-3">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className={cn("h-9 w-9", isDesktop && "nines-no-drag")}
+              aria-label="Open menu"
+              onClick={() => setMenuOpen(true)}
+            >
+              <Menu />
+            </Button>
+            <span className="truncate text-[14px] font-medium tracking-[-0.02em]">{loaderData.station.name}</span>
+            <div className={cn("ml-auto flex items-center gap-1", isDesktop && "nines-no-drag")}>
+              <Button type="button" variant="ghost" size="icon" className="h-9 w-9" aria-label="Open command palette" onClick={openPalette}>
+                <Search />
+              </Button>
+              <ThemeToggle />
+            </div>
+          </div>
+        </header>
+
+        <div className="print-hide hidden items-center justify-end gap-2 px-8 pt-5 md:flex">
+          <Button type="button" variant="secondary" size="sm" className="h-8 gap-2 px-3 text-[12px]" onClick={openPalette}>
+            <Search className="h-3.5 w-3.5" />
+            Search
+            <kbd className="text-[10px] text-muted-foreground">⌘K</kbd>
+          </Button>
+        </div>
+
+        {menuOpen ? (
+          <div className="fixed inset-0 z-40 print-hide md:hidden">
+            <button className="absolute inset-0 bg-black/20" aria-label="Close menu" onClick={() => setMenuOpen(false)} />
+            <div className="absolute left-0 top-0 flex h-full w-[280px] flex-col overflow-y-auto bg-sidebar p-3 shadow-2xl shadow-black/10">
+              <div className="mb-3 flex items-center justify-between px-2 pt-2">
+                <span className="text-[16px] font-semibold tracking-[-0.03em]">Nines</span>
+                <Button type="button" variant="ghost" size="icon" className="h-8 w-8" aria-label="Close menu" onClick={() => setMenuOpen(false)}>
+                  <X />
+                </Button>
+              </div>
+              <p className="mb-3 truncate px-2.5 text-[12px] text-muted-foreground">{loaderData.station.name}</p>
+              <Nav me={loaderData} onNavigate={() => setMenuOpen(false)} />
+              <div className="mt-auto pt-3">
+                <Button type="button" variant="ghost" size="sm" className="w-full justify-start" onClick={signOut}>
+                  <LogOut className="h-3.5 w-3.5" />
+                  Sign out
+                </Button>
+              </div>
+            </div>
+          </div>
+        ) : null}
+
+        <main id="main" className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 md:px-8 md:pb-12 md:pt-4">
           <Outlet context={loaderData} />
         </main>
       </div>
@@ -252,7 +282,7 @@ export default function AppLayout({ loaderData }: { loaderData: Me }) {
 export function ErrorBoundary() {
   return (
     <main className="mx-auto max-w-lg p-8">
-      <h1 className="text-xl font-semibold">This page didn’t load</h1>
+      <h1 className="text-xl font-semibold tracking-[-0.03em]">This page didn’t load</h1>
       <p className="mt-2 text-sm text-muted-foreground">Refresh and try again. If it keeps happening, check that the API is running.</p>
     </main>
   );
