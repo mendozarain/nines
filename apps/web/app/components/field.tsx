@@ -16,10 +16,12 @@ export function Field({
 }) {
   return (
     <div className="grid gap-1.5">
-      <Label htmlFor={htmlFor}>{label}</Label>
+      <Label htmlFor={htmlFor} className="text-[13px] font-medium text-muted-foreground">
+        {label}
+      </Label>
       {children}
-      {hint ? <p className="text-sm text-muted-foreground">{hint}</p> : null}
-      {error ? <p className="text-sm text-destructive">{error}</p> : null}
+      {hint ? <p className="text-[12px] text-muted-foreground">{hint}</p> : null}
+      {error ? <p className="text-[13px] text-destructive">{error}</p> : null}
     </div>
   );
 }
@@ -27,7 +29,7 @@ export function Field({
 export function FormError({ message }: { message?: string }) {
   if (!message) return null;
   return (
-    <p className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive" role="alert">
+    <p className="rounded-xl bg-destructive/10 px-3 py-2.5 text-[13px] text-destructive" role="alert">
       {message}
     </p>
   );

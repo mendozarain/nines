@@ -52,7 +52,7 @@ export default function BooksPage() {
       {data && data.accounts.length === 0 ? (
         <EmptyState title="No accounts yet" description="Accounts are created when you finish setup." />
       ) : null}
-      <div className="overflow-x-auto rounded-xl border bg-card/80">
+      <div className="nines-panel overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b text-left text-muted-foreground">

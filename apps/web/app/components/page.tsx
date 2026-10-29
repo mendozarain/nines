@@ -16,12 +16,12 @@ export function PageHeader({
   action?: ReactNode;
 }) {
   return (
-    <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
       <div className="grid gap-1">
-        <h1 className="font-display text-2xl font-semibold tracking-tight">{title}</h1>
-        {description ? <p className="max-w-2xl text-sm text-muted-foreground">{description}</p> : null}
+        <h1 className="text-[28px] font-bold leading-tight tracking-[-0.04em] text-foreground">{title}</h1>
+        {description ? <p className="max-w-2xl text-[14px] leading-relaxed text-muted-foreground">{description}</p> : null}
       </div>
-      {action}
+      {action ? <div className="flex flex-wrap items-center gap-2">{action}</div> : null}
     </div>
   );
 }
@@ -37,7 +37,7 @@ export function OverShort({ value, className }: { value: string; className?: str
       className={cn(
         "font-medium tabular-nums",
         described.tone === "short" && "text-destructive",
-        described.tone === "over" && "text-emerald-700 dark:text-emerald-400",
+        described.tone === "over" && "text-success-fg",
         described.tone === "even" && "text-muted-foreground",
         className,
       )}
@@ -62,24 +62,43 @@ export function StatCard({
 }) {
   const body = (
     <>
-      <p className="text-sm text-muted-foreground">{label}</p>
-      <p className="mt-1 text-2xl font-semibold tabular-nums" data-testid={testId}>
+      <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">{label}</p>
+      <p className="mt-2 text-[26px] font-bold tracking-[-0.04em] tabular-nums" data-testid={testId}>
         {value}
       </p>
-      {hint ? <p className="mt-1 text-sm text-muted-foreground">{hint}</p> : null}
+      {hint ? <p className="mt-1 text-[12px] text-muted-foreground">{hint}</p> : null}
     </>
   );
-  const className = "rounded-xl border border-border/70 bg-card/80 p-4 shadow-sm transition-colors hover:bg-accent/40";
   if (href) {
     return (
-      <Link to={href} className={className}>
+      <Link to={href} className="nines-metric block rounded-2xl border border-border/80 bg-card p-5 hover:bg-surface-hover/50">
         {body}
       </Link>
     );
   }
-  return <div className={className}>{body}</div>;
+  return <div className="rounded-2xl border border-border/80 bg-card p-5">{body}</div>;
 }
 
 export function LoadingBlock({ label = "Loading…" }: { label?: string }) {
-  return <p className="text-sm text-muted-foreground">{label}</p>;
+  return (
+    <div className="flex items-center gap-2 text-[14px] text-muted-foreground" role="status">
+      <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-muted-foreground/50" />
+      {label}
+    </div>
+  );
+}
+
+export function EntityCell({
+  name,
+  subtitle,
+}: {
+  name: string;
+  subtitle?: string;
+}) {
+  return (
+    <div className="min-w-0">
+      <p className="truncate text-[14px] font-semibold text-foreground">{name}</p>
+      {subtitle ? <p className="truncate text-[12px] text-muted-foreground">{subtitle}</p> : null}
+    </div>
+  );
 }

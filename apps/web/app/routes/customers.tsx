@@ -207,7 +207,7 @@ export default function CustomersPage() {
           <Link
             key={customer.id}
             to={`/customers/${customer.id}`}
-            className="flex flex-col gap-1 rounded-xl border bg-card/80 p-4 hover:bg-accent/30 sm:flex-row sm:items-center sm:justify-between"
+            className="flex flex-col gap-1 nines-row sm:flex-row sm:items-center sm:justify-between"
           >
             <div>
               <p className="font-medium">{customer.name}</p>

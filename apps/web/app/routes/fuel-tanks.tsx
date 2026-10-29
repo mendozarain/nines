@@ -90,7 +90,7 @@ export default function FuelTanksPage() {
       {data && data.tanks.length === 0 ? <EmptyState title="No tanks yet" description="Add a tank for each fuel storage vessel on site." /> : null}
       <div className="grid gap-2">
         {data?.tanks.map((tank) => (
-          <div key={tank.id} className="rounded-xl border bg-card/80 p-4 sm:flex sm:items-center sm:justify-between">
+          <div key={tank.id} className="nines-row sm:flex sm:items-center sm:justify-between">
             <div>
               <p className="font-medium">{tank.name}</p>
               <p className="text-sm text-muted-foreground">{tank.productName || tank.productId}</p>

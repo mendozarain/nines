@@ -2,65 +2,87 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Cool slate/teal — accountant-friendly, not purple or cream/terracotta */
+/*
+  Nines Design System — Ofacc+ (Figma Mt4SWTPaVSKfjeaZEP4Wjs)
+  See apps/web/DESIGN.md
+*/
 :root {
   --radius: 0.625rem;
-  --font-sans: "DM Sans", "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Source Serif 4", "DM Sans", Georgia, serif;
-  --background: oklch(0.985 0.008 230);
-  --foreground: oklch(0.22 0.025 220);
-  --card: oklch(0.995 0.004 230 / 0.92);
-  --card-foreground: oklch(0.22 0.025 220);
-  --popover: oklch(0.995 0.004 230);
-  --popover-foreground: oklch(0.22 0.025 220);
-  --primary: oklch(0.42 0.08 175);
-  --primary-foreground: oklch(0.98 0.01 175);
-  --secondary: oklch(0.94 0.015 220);
-  --secondary-foreground: oklch(0.28 0.03 220);
-  --muted: oklch(0.95 0.012 225);
-  --muted-foreground: oklch(0.48 0.025 220);
-  --accent: oklch(0.94 0.02 180);
-  --accent-foreground: oklch(0.28 0.04 175);
-  --destructive: oklch(0.55 0.2 25);
-  --border: oklch(0.88 0.015 220);
-  --input: oklch(0.88 0.015 220);
-  --ring: oklch(0.55 0.07 175);
-  --sidebar: oklch(0.975 0.01 225 / 0.9);
-  --sidebar-foreground: oklch(0.35 0.03 220);
-  --page-gradient: linear-gradient(165deg, oklch(0.975 0.018 220) 0%, oklch(0.985 0.01 195) 45%, oklch(0.97 0.02 175) 100%);
-  --chart: oklch(0.5 0.09 175);
+  --radius-frame: 1.5rem;
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+
+  --background: #f3f5f7;
+  --foreground: #111111;
+  --card: #ffffff;
+  --card-foreground: #111111;
+  --popover: #ffffff;
+  --popover-foreground: #111111;
+  --primary: #0094ff;
+  --primary-foreground: #ffffff;
+  --secondary: #f3f4f6;
+  --secondary-foreground: #111111;
+  --muted: #f3f4f6;
+  --muted-foreground: #6b7280;
+  --accent: #f3f4f6;
+  --accent-foreground: #111111;
+  --destructive: #dc2626;
+  --border: #e5e5e5;
+  --input: #e5e5e5;
+  --ring: #0094ff;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #6b7280;
+  --chart: #0094ff;
+  --surface-hover: #f3f4f6;
+  --success-bg: #ecfdf5;
+  --success-fg: #065f46;
+  --warning-bg: #fff1f2;
+  --warning-fg: #9f1239;
+  --neutral-bg: #f3f4f6;
+  --neutral-fg: #374151;
+  --accent-soft: #d3e3fd;
+  --frame-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 12px 32px rgba(16, 24, 40, 0.06);
 }
 
 .dark {
-  --background: oklch(0.18 0.02 230);
-  --foreground: oklch(0.93 0.01 220);
-  --card: oklch(0.22 0.022 230 / 0.85);
-  --card-foreground: oklch(0.93 0.01 220);
-  --popover: oklch(0.22 0.022 230);
-  --popover-foreground: oklch(0.93 0.01 220);
-  --primary: oklch(0.72 0.09 175);
-  --primary-foreground: oklch(0.18 0.03 175);
-  --secondary: oklch(0.26 0.025 225);
-  --secondary-foreground: oklch(0.9 0.01 220);
-  --muted: oklch(0.26 0.02 225);
-  --muted-foreground: oklch(0.7 0.02 220);
-  --accent: oklch(0.28 0.035 180);
-  --accent-foreground: oklch(0.92 0.02 175);
-  --destructive: oklch(0.65 0.18 25);
-  --border: oklch(0.32 0.025 225);
-  --input: oklch(0.32 0.025 225);
-  --ring: oklch(0.65 0.08 175);
-  --sidebar: oklch(0.16 0.02 230 / 0.95);
-  --sidebar-foreground: oklch(0.82 0.015 220);
-  --page-gradient: linear-gradient(165deg, oklch(0.16 0.025 230) 0%, oklch(0.19 0.03 210) 50%, oklch(0.17 0.035 175) 100%);
-  --chart: oklch(0.7 0.1 175);
+  --background: #0f1115;
+  --foreground: #f9fafb;
+  --card: #171a21;
+  --card-foreground: #f9fafb;
+  --popover: #171a21;
+  --popover-foreground: #f9fafb;
+  --primary: #0a84ff;
+  --primary-foreground: #ffffff;
+  --secondary: #1f2430;
+  --secondary-foreground: #f9fafb;
+  --muted: #1f2430;
+  --muted-foreground: #9ca3af;
+  --accent: #1f2430;
+  --accent-foreground: #f9fafb;
+  --destructive: #f87171;
+  --border: #2a3140;
+  --input: #2a3140;
+  --ring: #0a84ff;
+  --sidebar: #141821;
+  --sidebar-foreground: #9ca3af;
+  --chart: #0a84ff;
+  --surface-hover: #1f2430;
+  --accent-soft: #1e3a5f;
+  --success-bg: #052e1c;
+  --success-fg: #6ee7b7;
+  --warning-bg: #3f0d1a;
+  --warning-fg: #fda4af;
+  --neutral-bg: #1f2430;
+  --neutral-fg: #d1d5db;
+  --frame-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 12px 32px rgba(0, 0, 0, 0.35);
 }
 
 @theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+  --radius-xl: calc(var(--radius) + 6px);
+  --radius-2xl: var(--radius-frame);
   --font-sans: var(--font-sans);
   --font-display: var(--font-display);
   --color-background: var(--background);
@@ -84,6 +106,14 @@
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-chart: var(--chart);
+  --color-surface-hover: var(--surface-hover);
+  --color-success-bg: var(--success-bg);
+  --color-success-fg: var(--success-fg);
+  --color-warning-bg: var(--warning-bg);
+  --color-warning-fg: var(--warning-fg);
+  --color-neutral-bg: var(--neutral-bg);
+  --color-neutral-fg: var(--neutral-fg);
+  --color-accent-soft: var(--accent-soft);
 }
 
 @layer base {
@@ -92,26 +122,47 @@
   }
   html {
     font-family: var(--font-sans);
+    letter-spacing: -0.011em;
   }
   body {
-    @apply text-foreground antialiased;
-    background: var(--page-gradient);
-    background-attachment: fixed;
+    @apply bg-background text-foreground antialiased;
     min-height: 100vh;
   }
   .font-display {
     font-family: var(--font-display);
+    letter-spacing: -0.03em;
   }
   button,
   a,
   input,
   select,
   textarea {
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/25 focus-visible:ring-offset-2 focus-visible:ring-offset-background;
   }
 }
 
-/* macOS desktop shell drag region (set when window.ninesDesktop is present) */
+@layer utilities {
+  .nines-frame {
+    background: var(--card);
+    box-shadow: var(--frame-shadow);
+  }
+  .nines-row {
+    @apply transition-colors hover:bg-surface-hover/70;
+  }
+  .nines-panel {
+    @apply overflow-hidden rounded-2xl border border-border/80 bg-card;
+  }
+  .nines-metric {
+    @apply block rounded-xl px-1 py-1 transition-colors hover:bg-surface-hover/70;
+  }
+  .nines-table-head {
+    @apply px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.06em] text-muted-foreground;
+  }
+  .nines-table-cell {
+    @apply px-4 py-4 align-middle text-sm;
+  }
+}
+
 .nines-drag-region {
   -webkit-app-region: drag;
   app-region: drag;

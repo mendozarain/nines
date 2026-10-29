@@ -44,7 +44,7 @@ export default function SalesDetailPage() {
       />
       <Card className="print:border-0 print:shadow-none">
         <CardHeader>
-          <CardTitle className="font-display">{data.buyerName || data.customerName || "Walk-in customer"}</CardTitle>
+          <CardTitle>{data.buyerName || data.customerName || "Walk-in customer"}</CardTitle>
           <p className="text-sm text-muted-foreground">
             {[data.buyerTin, data.buyerAddress].filter(Boolean).join(" · ") || "No buyer TIN / address on file"}
           </p>

@@ -42,21 +42,19 @@ export default function Login() {
         <Field label="Password" htmlFor="password">
           <Input id="password" name="password" type="password" autoComplete="current-password" required />
         </Field>
-        <Button type="submit" size="lg" disabled={pending}>
+        <Button type="submit" size="lg" className="mt-1 w-full" disabled={pending}>
           {pending ? "Signing in…" : "Sign in"}
         </Button>
       </form>
-      <p className="text-sm text-muted-foreground">
+      <p className="text-center text-[13px] text-muted-foreground">
         New station?{" "}
-        <Link className="font-medium text-foreground underline-offset-4 hover:underline" to="/signup">
+        <Link className="font-semibold text-primary underline-offset-4 hover:underline" to="/signup">
           Create an account
         </Link>
       </p>
-      <div className="rounded-lg bg-muted px-3 py-2 text-sm text-muted-foreground">
-        <p className="font-medium text-foreground">Sample station</p>
-        <p>demo@nines.local</p>
-        <p>station123</p>
-      </div>
+      <p className="text-center text-[11px] text-muted-foreground/80">
+        Demo · demo@nines.local · station123
+      </p>
     </AuthShell>
   );
 }

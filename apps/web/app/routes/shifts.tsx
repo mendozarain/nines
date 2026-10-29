@@ -48,7 +48,7 @@ export default function ShiftsPage() {
           <h2 className="text-sm font-medium text-muted-foreground">{formatDate(date)}</h2>
           <div className="grid gap-2">
             {shifts.map((shift) => (
-              <Link key={shift.id} to={`/shifts/${shift.id}`} className="flex flex-col gap-2 rounded-xl border bg-card p-4 shadow-sm hover:bg-accent/30 sm:flex-row sm:items-center sm:justify-between">
+              <Link key={shift.id} to={`/shifts/${shift.id}`} className="flex flex-col gap-2 nines-row sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-2">
                   <Badge>{shift.name}</Badge>
                   <span className="text-sm text-muted-foreground">{shift.readings.length} pumps</span>

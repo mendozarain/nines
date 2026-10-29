@@ -1,7 +1,7 @@
 import { Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Button } from "~/components/ui/button";
 import { applyTheme, getStoredTheme, resolveDark, toggleTheme, type ThemePreference } from "~/lib/theme";
+import { cn } from "~/lib/utils";
 
 export function ThemeToggle({ className }: { className?: string }) {
   const [dark, setDark] = useState(false);
@@ -22,19 +22,39 @@ export function ThemeToggle({ className }: { className?: string }) {
   }, []);
 
   return (
-    <Button
-      type="button"
-      variant="ghost"
-      size="icon"
-      className={className}
-      aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
-      title={dark ? "Light mode" : "Dark mode"}
-      onClick={() => {
-        const next: ThemePreference = toggleTheme();
-        setDark(resolveDark(next));
-      }}
-    >
-      {dark ? <Sun /> : <Moon />}
-    </Button>
+    <div className={cn("inline-flex items-center rounded-full bg-muted p-1", className)}>
+      <button
+        type="button"
+        className={cn(
+          "inline-flex h-7 w-7 items-center justify-center rounded-full transition-colors",
+          !dark ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
+        )}
+        aria-label="Light mode"
+        onClick={() => {
+          if (dark) {
+            const next: ThemePreference = toggleTheme();
+            setDark(resolveDark(next));
+          }
+        }}
+      >
+        <Sun className="h-3.5 w-3.5" strokeWidth={1.75} />
+      </button>
+      <button
+        type="button"
+        className={cn(
+          "inline-flex h-7 w-7 items-center justify-center rounded-full transition-colors",
+          dark ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
+        )}
+        aria-label="Dark mode"
+        onClick={() => {
+          if (!dark) {
+            const next: ThemePreference = toggleTheme();
+            setDark(resolveDark(next));
+          }
+        }}
+      >
+        <Moon className="h-3.5 w-3.5" strokeWidth={1.75} />
+      </button>
+    </div>
   );
 }

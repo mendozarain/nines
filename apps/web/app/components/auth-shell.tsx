@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 
 export function AuthShell({
   title,
@@ -11,19 +10,20 @@ export function AuthShell({
   children: ReactNode;
 }) {
   return (
-    <main className="flex min-h-screen items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="mb-6">
-          <p className="font-display text-3xl font-semibold tracking-tight">Nines</p>
-          <p className="mt-1 text-sm text-muted-foreground">Small-business books for the Philippines</p>
+    <main className="flex min-h-screen items-center justify-center px-4 py-16">
+      <div className="w-full max-w-[400px]">
+        <div className="mb-8 text-center">
+          <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-sm font-bold text-primary-foreground">
+            N
+          </div>
+          <p className="text-[28px] font-bold tracking-[-0.04em]">Nines</p>
+          <p className="mt-1 text-[14px] text-muted-foreground">Books for Philippine small businesses</p>
         </div>
-        <Card className="border-border/80 bg-card/90 shadow-sm">
-          <CardHeader>
-            <CardTitle className="text-xl">{title}</CardTitle>
-            <CardDescription>{subtitle}</CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-4">{children}</CardContent>
-        </Card>
+        <div className="nines-frame rounded-[24px] px-6 py-7">
+          <h1 className="text-[22px] font-bold tracking-[-0.03em]">{title}</h1>
+          <p className="mt-1 text-[14px] text-muted-foreground">{subtitle}</p>
+          <div className="mt-6 grid gap-4">{children}</div>
+        </div>
       </div>
     </main>
   );

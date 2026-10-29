@@ -113,7 +113,7 @@ export default function ExpensesPage() {
       ) : null}
       <div className="grid gap-2">
         {data?.expenses.map((expense) => (
-          <div key={expense.id} className="flex flex-col gap-2 rounded-xl border bg-card p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div key={expense.id} className="flex flex-col gap-2 nines-row sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="font-medium">{expense.category}</p>
               <p className="text-sm text-muted-foreground">

@@ -86,7 +86,7 @@ export default function BooksAssetsPage() {
       {data && data.assets.length === 0 ? <EmptyState title="No fixed assets yet" description="Add equipment when you capitalize a purchase." /> : null}
       <div className="grid gap-2">
         {data?.assets.map((asset) => (
-          <div key={asset.id} className="rounded-xl border bg-card/80 p-4 sm:flex sm:justify-between">
+          <div key={asset.id} className="nines-row sm:flex sm:justify-between">
             <div>
               <p className="font-medium">{asset.name}</p>
               <p className="text-sm text-muted-foreground">

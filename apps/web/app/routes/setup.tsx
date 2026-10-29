@@ -3,7 +3,6 @@ import { useNavigate, useOutletContext } from "react-router";
 import { INDUSTRIES, INDUSTRY_LABELS, PH_TIN_REGEX, SUGGESTED_PRODUCTS, type Industry } from "@nines/shared";
 import { Field, FormError } from "~/components/field";
 import { Button } from "~/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { NativeSelect } from "~/components/ui/select";
 import { Switch } from "~/components/ui/switch";
@@ -149,36 +148,36 @@ export default function Setup() {
   const title = steps[step] ?? "Setup";
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-xl flex-col justify-center p-4">
-      <p className="mb-1 font-display text-2xl font-semibold tracking-tight">Nines</p>
-      <p className="mb-4 text-sm text-muted-foreground">
+    <main className="mx-auto flex min-h-screen max-w-lg flex-col justify-center p-4 py-12">
+      <p className="mb-1 text-[28px] font-semibold tracking-[-0.04em]">Nines</p>
+      <p className="mb-8 text-[14px] text-muted-foreground">
         Welcome{me.user ? `, ${me.user.name}` : ""}. A short setup — you can change everything later.
       </p>
-      <Card className="border-border/80 bg-card/90 shadow-sm">
-        <CardHeader>
-          <CardDescription>
+      <div className="grid gap-6 rounded-2xl bg-card p-6 sm:p-7">
+        <div>
+          <p className="text-[12px] font-medium text-muted-foreground">
             Step {step + 1} of {steps.length}
-          </CardDescription>
-          <CardTitle>{title}</CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-4">
+          </p>
+          <h1 className="mt-1 text-[21px] font-semibold tracking-[-0.03em]">{title}</h1>
+        </div>
+        <div className="grid gap-4">
           <FormError message={error} />
 
           {step === 0 ? (
             <>
-              <p className="text-sm text-muted-foreground">What kind of business are you running? This only turns on the extras you need.</p>
+              <p className="text-[14px] text-muted-foreground">What kind of business are you running? This only turns on the extras you need.</p>
               <div className="grid gap-2">
                 {INDUSTRIES.map((value) => (
                   <button
                     key={value}
                     type="button"
                     onClick={() => setIndustry(value)}
-                    className={`rounded-lg border px-4 py-3 text-left transition-colors ${
-                      industry === value ? "border-primary bg-accent/50" : "hover:bg-muted/60"
+                    className={`rounded-xl px-4 py-3.5 text-left transition-colors ${
+                      industry === value ? "bg-accent ring-2 ring-primary/30" : "bg-muted/60 hover:bg-muted"
                     }`}
                   >
-                    <p className="font-medium">{INDUSTRY_LABELS[value]}</p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="font-medium tracking-[-0.02em]">{INDUSTRY_LABELS[value]}</p>
+                    <p className="mt-0.5 text-[13px] text-muted-foreground">
                       {value === "FUEL_STATION"
                         ? "Pumps, tanks, dips, and fuel deliveries."
                         : value === "RETAIL"
@@ -449,8 +448,8 @@ export default function Setup() {
               </div>
             </>
           ) : null}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </main>
   );
 }

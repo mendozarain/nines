@@ -133,7 +133,7 @@ export default function ReportsPage() {
 
 function Summary({ label, value }: { label: string; value: ReactNode }) {
   return (
-    <div className="rounded-xl border bg-card p-4">
+    <div className="nines-row">
       <p className="text-sm text-muted-foreground">{label}</p>
       <p className="mt-1 text-xl font-semibold">{value}</p>
     </div>

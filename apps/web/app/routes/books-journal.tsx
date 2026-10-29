@@ -101,7 +101,7 @@ export default function BooksJournalPage() {
       {data && data.entries.length === 0 ? <EmptyState title="No journal entries yet" description="Post a simple debit/credit when you need a manual adjustment." /> : null}
       <div className="grid gap-3">
         {data?.entries.map((entry) => (
-          <div key={entry.id} className="rounded-xl border bg-card/80 p-4">
+          <div key={entry.id} className="nines-row">
             <p className="font-medium">
               {formatDate(entry.businessDate)} · {entry.reference || "Journal"}
             </p>
