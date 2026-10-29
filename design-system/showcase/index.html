@@ -1,0 +1,551 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Nines Design System — Ofacc+</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async></script>
+    <style>
+      :root {
+        --canvas: #f3f5f7;
+        --surface: #ffffff;
+        --ink: #111827;
+        --muted: #6b7280;
+        --line: #e5e7eb;
+        --accent: #0066ff;
+        --accent-soft: #eff6ff;
+        --success-bg: #ecfdf5;
+        --success-fg: #065f46;
+        --open-bg: #fff7ed;
+        --open-fg: #c2410c;
+        --info-bg: #ecfdf5;
+        --info-fg: #166534;
+        --danger-bg: #fff1f2;
+        --danger-fg: #9f1239;
+        --neutral-bg: #f3f4f6;
+        --neutral-fg: #374151;
+        --sku-bg: #eff6ff;
+        --sku-fg: #0066ff;
+        --radius-control: 10px;
+        --radius-frame: 24px;
+        --radius-panel: 12px;
+        --radius-pill: 999px;
+        --shadow-frame: 0 1px 2px rgba(16, 24, 40, 0.04), 0 12px 32px rgba(16, 24, 40, 0.06);
+        --font: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+      }
+
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: var(--font);
+        background: var(--canvas);
+        color: var(--ink);
+        letter-spacing: -0.011em;
+      }
+
+      .page {
+        width: 1440px;
+        margin: 0 auto;
+        padding: 48px 56px 80px;
+      }
+
+      .hero {
+        background: var(--surface);
+        border-radius: var(--radius-frame);
+        box-shadow: var(--shadow-frame);
+        padding: 48px 56px;
+        margin-bottom: 32px;
+      }
+      .eyebrow {
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin: 0 0 12px;
+      }
+      h1 {
+        margin: 0 0 12px;
+        font-size: 40px;
+        letter-spacing: -0.03em;
+        font-weight: 700;
+      }
+      .lede {
+        margin: 0;
+        max-width: 640px;
+        color: var(--muted);
+        font-size: 16px;
+        line-height: 1.55;
+      }
+      .meta {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 24px;
+      }
+
+      .section {
+        background: var(--surface);
+        border-radius: var(--radius-frame);
+        box-shadow: var(--shadow-frame);
+        padding: 36px 40px;
+        margin-bottom: 24px;
+      }
+      .section h2 {
+        margin: 0 0 6px;
+        font-size: 22px;
+        letter-spacing: -0.02em;
+      }
+      .section .sub {
+        margin: 0 0 28px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .grid {
+        display: grid;
+        gap: 16px;
+      }
+      .grid-6 { grid-template-columns: repeat(6, 1fr); }
+      .grid-4 { grid-template-columns: repeat(4, 1fr); }
+      .grid-3 { grid-template-columns: repeat(3, 1fr); }
+      .grid-2 { grid-template-columns: repeat(2, 1fr); }
+
+      .swatch {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        overflow: hidden;
+        background: #fff;
+      }
+      .swatch .chip {
+        height: 72px;
+      }
+      .swatch .info {
+        padding: 12px 14px;
+      }
+      .swatch .name {
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .swatch .hex {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 2px;
+      }
+
+      .type-row {
+        display: grid;
+        grid-template-columns: 160px 1fr;
+        gap: 24px;
+        padding: 18px 0;
+        border-bottom: 1px solid var(--line);
+        align-items: baseline;
+      }
+      .type-row:last-child { border-bottom: 0; }
+      .type-meta {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        border-radius: var(--radius-pill);
+        padding: 4px 10px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+      .pill.open { background: var(--open-bg); color: var(--open-fg); }
+      .pill.success { background: var(--success-bg); color: var(--success-fg); }
+      .pill.info { background: var(--info-bg); color: var(--info-fg); }
+      .pill.danger { background: var(--danger-bg); color: var(--danger-fg); }
+      .pill.neutral { background: var(--neutral-bg); color: var(--neutral-fg); }
+      .pill.accent { background: var(--accent); color: #fff; }
+
+      .sku {
+        display: inline-flex;
+        align-items: center;
+        border-radius: var(--radius-pill);
+        background: var(--sku-bg);
+        color: var(--sku-fg);
+        padding: 3px 10px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        height: 40px;
+        padding: 0 16px;
+        border-radius: var(--radius-control);
+        border: 1px solid transparent;
+        font: inherit;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: default;
+      }
+      .btn.primary { background: var(--accent); color: #fff; }
+      .btn.secondary { background: var(--neutral-bg); color: var(--ink); }
+      .btn.outline { background: #fff; border-color: var(--line); color: var(--ink); }
+      .btn.ghost { background: transparent; color: var(--muted); }
+      .btn.sm { height: 32px; padding: 0 12px; font-size: 12px; }
+      .btn.lg { height: 44px; padding: 0 20px; font-size: 15px; }
+
+      .search {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        height: 40px;
+        padding: 0 14px;
+        background: var(--neutral-bg);
+        border-radius: var(--radius-control);
+        color: var(--muted);
+        font-size: 14px;
+        max-width: 320px;
+      }
+      .kbd {
+        margin-left: auto;
+        border: 1px solid var(--line);
+        background: #fff;
+        border-radius: 6px;
+        padding: 2px 6px;
+        font-size: 11px;
+        color: var(--muted);
+      }
+
+      .nav {
+        width: 240px;
+        background: #fafafa;
+        border-radius: 16px;
+        padding: 12px;
+        border: 1px solid var(--line);
+      }
+      .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        color: var(--muted);
+        font-size: 14px;
+        font-weight: 500;
+      }
+      .nav-item.active {
+        background: var(--neutral-bg);
+        color: var(--ink);
+        font-weight: 600;
+      }
+      .dot {
+        width: 16px;
+        height: 16px;
+        border-radius: 4px;
+        background: currentColor;
+        opacity: 0.35;
+      }
+
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: var(--radius-panel);
+        overflow: hidden;
+        background: #fff;
+      }
+      .panel-head {
+        display: grid;
+        grid-template-columns: 1fr 64px 96px 96px;
+        gap: 12px;
+        padding: 10px 16px;
+        background: #fafafa;
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        border-bottom: 1px solid var(--line);
+      }
+      .row {
+        display: grid;
+        grid-template-columns: 1fr 64px 96px 96px;
+        gap: 12px;
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--line);
+        align-items: center;
+        font-size: 14px;
+      }
+      .row:last-child { border-bottom: 0; }
+      .sku-cell {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .bundle {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        background: var(--accent-soft);
+        color: var(--accent);
+        display: grid;
+        place-items: center;
+        font-size: 12px;
+        font-weight: 700;
+      }
+      .child {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 16px 14px 44px;
+        color: var(--muted);
+        font-size: 13px;
+        border-bottom: 1px solid var(--line);
+      }
+      .child::before {
+        content: "";
+        width: 14px;
+        height: 14px;
+        border-left: 1px solid #d1d5db;
+        border-bottom: 1px solid #d1d5db;
+        margin-right: 4px;
+        margin-top: -8px;
+      }
+
+      .stack {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .metric {
+        padding: 16px 18px;
+        border-radius: 12px;
+        background: #fafafa;
+        border: 1px solid var(--line);
+      }
+      .metric .label {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      .metric .value {
+        margin-top: 6px;
+        font-size: 28px;
+        font-weight: 700;
+        letter-spacing: -0.03em;
+      }
+
+      .radius-demo {
+        display: flex;
+        gap: 16px;
+        align-items: end;
+      }
+      .radius-box {
+        background: var(--accent-soft);
+        border: 1px solid #bfdbfe;
+        color: var(--accent);
+        font-size: 12px;
+        font-weight: 600;
+        display: grid;
+        place-items: center;
+      }
+
+      .app-shell {
+        display: grid;
+        grid-template-columns: 220px 1fr;
+        gap: 0;
+        background: var(--canvas);
+        border-radius: var(--radius-frame);
+        overflow: hidden;
+        border: 1px solid var(--line);
+        min-height: 420px;
+      }
+      .shell-side {
+        background: #fafafa;
+        padding: 20px 14px;
+        border-right: 1px solid var(--line);
+      }
+      .brand {
+        font-weight: 700;
+        font-size: 18px;
+        letter-spacing: -0.03em;
+        padding: 4px 10px 18px;
+      }
+      .shell-main {
+        background: #fff;
+        padding: 24px 28px;
+      }
+      .shell-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+      .shell-title h3 {
+        margin: 0;
+        font-size: 18px;
+        letter-spacing: -0.02em;
+      }
+      .alert {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--line);
+        font-size: 13px;
+      }
+      .alert:last-child { border-bottom: 0; }
+      .alert time { color: var(--muted); white-space: nowrap; }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <section class="hero">
+        <p class="eyebrow">Nines · Design System</p>
+        <h1>Ofacc+ foundations</h1>
+        <p class="lede">
+          Calm SaaS books UI for Philippine small businesses. Canvas → white framed
+          surface → one accent blue. Updated from LYNK / Ofacc inspo: soft status
+          pills, SKU chips, airy sidebar, hairline tables.
+        </p>
+        <div class="meta">
+          <span class="pill accent">Accent #0066FF</span>
+          <span class="pill neutral">Plus Jakarta Sans</span>
+          <span class="pill open">Open</span>
+          <span class="pill info">Pre-flight</span>
+          <span class="pill success">Paid / Active</span>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Color · primitives</h2>
+        <p class="sub">Raw values from apps/web DESIGN.md + LYNK status language.</p>
+        <div class="grid grid-6">
+          <div class="swatch"><div class="chip" style="background:#0066FF"></div><div class="info"><div class="name">blue/500</div><div class="hex">#0066FF · accent</div></div></div>
+          <div class="swatch"><div class="chip" style="background:#EFF6FF"></div><div class="info"><div class="name">blue/50</div><div class="hex">#EFF6FF · soft</div></div></div>
+          <div class="swatch"><div class="chip" style="background:#F3F5F7"></div><div class="info"><div class="name">gray/150</div><div class="hex">#F3F5F7 · canvas</div></div></div>
+          <div class="swatch"><div class="chip" style="background:#FFFFFF;border-bottom:1px solid #E5E7EB"></div><div class="info"><div class="name">white/1000</div><div class="hex">#FFFFFF · surface</div></div></div>
+          <div class="swatch"><div class="chip" style="background:#111827"></div><div class="info"><div class="name">gray/900</div><div class="hex">#111827 · ink</div></div></div>
+          <div class="swatch"><div class="chip" style="background:#6B7280"></div><div class="info"><div class="name">gray/500</div><div class="hex">#6B7280 · muted</div></div></div>
+          <div class="swatch"><div class="chip" style="background:#E5E7EB"></div><div class="info"><div class="name">gray/200</div><div class="hex">#E5E7EB · line</div></div></div>
+          <div class="swatch"><div class="chip" style="background:#ECFDF5"></div><div class="info"><div class="name">green/50</div><div class="hex">#ECFDF5</div></div></div>
+          <div class="swatch"><div class="chip" style="background:#065F46"></div><div class="info"><div class="name">green/700</div><div class="hex">#065F46</div></div></div>
+          <div class="swatch"><div class="chip" style="background:#FFF7ED"></div><div class="info"><div class="name">amber/50</div><div class="hex">#FFF7ED · open</div></div></div>
+          <div class="swatch"><div class="chip" style="background:#C2410C"></div><div class="info"><div class="name">amber/700</div><div class="hex">#C2410C</div></div></div>
+          <div class="swatch"><div class="chip" style="background:#FFF1F2"></div><div class="info"><div class="name">coral/50</div><div class="hex">#FFF1F2 · not paid</div></div></div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Typography</h2>
+        <p class="sub">Plus Jakarta Sans · tight tracking for titles.</p>
+        <div class="type-row"><div class="type-meta">Display / 40</div><div style="font-size:40px;font-weight:700;letter-spacing:-0.03em">Good morning, Rain</div></div>
+        <div class="type-row"><div class="type-meta">Title / 22</div><div style="font-size:22px;font-weight:700;letter-spacing:-0.02em">Customers & receivables</div></div>
+        <div class="type-row"><div class="type-meta">Body / 14</div><div style="font-size:14px;font-weight:500">Zenith Elixir Wellness Capsules Twin Pack</div></div>
+        <div class="type-row"><div class="type-meta">Label / 12</div><div style="font-size:12px;font-weight:600;color:#6B7280;text-transform:uppercase;letter-spacing:0.06em">SKU / description</div></div>
+        <div class="type-row"><div class="type-meta">Muted / 13</div><div style="font-size:13px;color:#6B7280">Updated 8:30 AM · AI-generated insights</div></div>
+      </section>
+
+      <section class="section">
+        <h2>Radius & elevation</h2>
+        <p class="sub">Control 10 · Panel 12 · Frame 24 · Pill full. Soft frame shadow, no heavy card stacks.</p>
+        <div class="radius-demo">
+          <div class="radius-box" style="width:88px;height:56px;border-radius:10px">10</div>
+          <div class="radius-box" style="width:96px;height:64px;border-radius:12px">12</div>
+          <div class="radius-box" style="width:120px;height:80px;border-radius:24px">24</div>
+          <div class="radius-box" style="width:140px;height:40px;border-radius:999px">pill</div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Components · atoms</h2>
+        <p class="sub">Status pills, buttons, search, SKU chips — matching Ofacc/LYNK scanning patterns.</p>
+        <div class="stack" style="margin-bottom:20px">
+          <span class="pill open">Open</span>
+          <span class="pill info">Pre-flight</span>
+          <span class="pill success">Paid</span>
+          <span class="pill success">Active</span>
+          <span class="pill danger">Not paid</span>
+          <span class="pill neutral">Awaiting</span>
+          <span class="sku">UK_SFSG1</span>
+          <span class="sku">HM-4402</span>
+        </div>
+        <div class="stack" style="margin-bottom:20px">
+          <button class="btn primary">Save shift</button>
+          <button class="btn outline">Export CSV</button>
+          <button class="btn secondary">Secondary</button>
+          <button class="btn ghost">Cancel</button>
+          <button class="btn primary sm">Small</button>
+          <button class="btn primary lg">Large</button>
+        </div>
+        <div class="search">
+          <span>⌕</span>
+          <span>Search books, customers…</span>
+          <span class="kbd">⌘K</span>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Line items · hierarchy</h2>
+        <p class="sub">Table + bundle expansion pattern from inspo (L-connector, SKU pill, qty).</p>
+        <div class="panel">
+          <div class="panel-head"><div>SKU / description</div><div>Qty</div><div>Unit cost</div><div>Discount</div></div>
+          <div class="row">
+            <div class="sku-cell"><div class="bundle">⧉</div><span class="sku">UK_SFSG1</span><span>Zenith Elixir Wellness Capsules Twin Pack</span></div>
+            <div>1</div><div>£69.99</div><div style="color:#6B7280">—</div>
+          </div>
+          <div class="child"><span style="font-size:12px;color:#9CA3AF;margin-right:4px">2 ×</span><span class="sku">UK_SFSG1</span><span>Zenith Elixir Wellness Capsules</span></div>
+          <div class="row">
+            <div class="sku-cell"><div class="bundle" style="background:#F3F4F6;color:#6B7280">●</div><span class="sku">UK_RRDC1</span><span>Radiant Revive Daily Capsules</span></div>
+            <div>1</div><div>£69.99</div><div style="color:#6B7280">—</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>App shell composition</h2>
+        <p class="sub">Sidebar + white workspace. Soft active pill. Critical alerts + metrics language from dashboard inspo, applied to Nines books.</p>
+        <div class="app-shell">
+          <aside class="shell-side">
+            <div class="brand">Nines</div>
+            <div class="search" style="max-width:none;margin-bottom:12px;height:36px"><span>⌕</span><span>Search</span><span class="kbd">⌘K</span></div>
+            <div class="nav-item"><span class="dot"></span>Dashboard</div>
+            <div class="nav-item active"><span class="dot"></span>Sales</div>
+            <div class="nav-item"><span class="dot"></span>Customers</div>
+            <div class="nav-item"><span class="dot"></span>Expenses</div>
+            <div class="nav-item"><span class="dot"></span>Reports</div>
+          </aside>
+          <main class="shell-main">
+            <div class="shell-title">
+              <h3>Today, Oct 29, 2026</h3>
+              <span class="pill success">Books ready</span>
+            </div>
+            <div class="grid grid-4" style="margin-bottom:18px">
+              <div class="metric"><div class="label">Orders</div><div class="value">149</div></div>
+              <div class="metric"><div class="label">Revenue</div><div class="value">₱30k</div></div>
+              <div class="metric"><div class="label">Holds</div><div class="value">45</div></div>
+              <div class="metric"><div class="label">Unmapped</div><div class="value">17</div></div>
+            </div>
+            <div class="panel">
+              <div style="padding:12px 14px;border-bottom:1px solid var(--line);font-weight:600;font-size:14px">Critical alerts <span class="pill danger" style="margin-left:6px">3</span></div>
+              <div class="alert"><span>Inventory imbalance · SKU HM-4402</span><time>2m ago</time></div>
+              <div class="alert"><span>18 orders stalled in pre-flight</span><time>14m ago</time></div>
+              <div class="alert"><span>Carrier SLA dipping · 91.2%</span><time>2m ago</time></div>
+            </div>
+          </main>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>
