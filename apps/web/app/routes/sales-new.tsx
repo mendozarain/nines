@@ -308,7 +308,7 @@ export default function SalesNewPage() {
           <CardContent className="flex flex-col gap-3 pt-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Estimated total{isSeniorOrPwd ? " after SC/PWD" : ""}</p>
-              <p className="text-2xl font-semibold tabular-nums">{formatCentavos(Math.round(estimatedTotal * 100))}</p>
+              <p className="text-2xl font-semibold tracking-tight font-money">{formatCentavos(Math.round(estimatedTotal * 100))}</p>
               {overLimit ? (
                 <label className="mt-2 flex items-start gap-2 text-sm text-destructive">
                   <input type="checkbox" checked={overLimitAck} onChange={(event) => setOverLimitAck(event.target.checked)} className="mt-1" />
@@ -318,7 +318,7 @@ export default function SalesNewPage() {
                 </label>
               ) : null}
             </div>
-            <Button type="submit" size="lg" disabled={pending}>
+            <Button type="submit" disabled={pending}>
               {pending ? "Saving…" : "Save sale"}
             </Button>
           </CardContent>

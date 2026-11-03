@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useOutletContext } from "react-router";
 import { formatDate, formatLitres } from "@nines/shared";
 import { Field, FormError } from "~/components/field";
-import { EmptyState, LoadingBlock, PageHeader } from "~/components/page";
+import { DataTable, EmptyState, LoadingBlock, PageHeader, Td, Th } from "~/components/page";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
@@ -103,27 +103,38 @@ export default function FuelDipsPage() {
       {loading ? <LoadingBlock /> : null}
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
       {data && data.dips.length === 0 ? <EmptyState title="No dips yet" description="Record a stick reading after the shift or delivery." /> : null}
-      <div className="grid gap-2">
-        {data?.dips.map((dip) => {
-          const variance = BigInt(dip.physicalCentilitres) - BigInt(dip.bookClosingCentilitres);
-          return (
-            <div key={dip.id} className="rounded-xl border bg-card/80 p-4">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="font-medium">
-                  {formatDate(dip.businessDate)} · {dip.tankName || dip.tankId}
-                </p>
-                <p className={`text-sm tabular-nums ${variance < 0n ? "text-destructive" : ""}`}>
-                  Variance {formatLitres(variance.toString())} L
-                </p>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Book {formatLitres(dip.bookClosingCentilitres)} L · Physical {formatLitres(dip.physicalCentilitres)} L
-                {dip.note ? ` · ${dip.note}` : ""}
-              </p>
-            </div>
-          );
-        })}
-      </div>
+      {data && data.dips.length > 0 ? (
+        <DataTable>
+          <thead>
+            <tr>
+              <Th>Date / tank</Th>
+              <Th align="right">Book</Th>
+              <Th align="right">Physical</Th>
+              <Th align="right">Variance</Th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.dips.map((dip) => {
+              const variance = BigInt(dip.physicalCentilitres) - BigInt(dip.bookClosingCentilitres);
+              return (
+                <tr key={dip.id}>
+                  <Td>
+                    <span className="font-medium">
+                      {formatDate(dip.businessDate)} · {dip.tankName || dip.tankId}
+                    </span>
+                    {dip.note ? <p className="text-xs text-muted-foreground">{dip.note}</p> : null}
+                  </Td>
+                  <Td className="text-right tabular-nums">{formatLitres(dip.bookClosingCentilitres)} L</Td>
+                  <Td className="text-right tabular-nums">{formatLitres(dip.physicalCentilitres)} L</Td>
+                  <Td className={variance < 0n ? "text-right tabular-nums text-destructive" : "text-right tabular-nums"}>
+                    {formatLitres(variance.toString())} L
+                  </Td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </DataTable>
+      ) : null}
     </div>
   );
 }

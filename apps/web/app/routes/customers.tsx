@@ -78,7 +78,7 @@ export default function CustomersPage() {
         title="Customers"
         description="People and organizations you sell to — including credit terms, tax treatment, and SC/PWD."
         action={
-          <Button asChild size="lg">
+          <Button asChild>
             <Link to="/sales/new">New sale</Link>
           </Button>
         }
@@ -190,7 +190,7 @@ export default function CustomersPage() {
               <Input id="customer-notes" name="notes" placeholder="Pays every Friday" />
             </Field>
             <div className="self-end">
-              <Button type="submit" size="lg" disabled={pending}>
+              <Button type="submit" disabled={pending}>
                 {pending ? "Saving…" : "Add customer"}
               </Button>
             </div>
@@ -202,25 +202,40 @@ export default function CustomersPage() {
       {data && data.customers.length === 0 ? (
         <EmptyState title="No customers yet" description="Add a customer when someone buys on account or needs a named invoice." />
       ) : null}
-      <div className="grid gap-2">
-        {data?.customers.map((customer) => (
-          <Link
-            key={customer.id}
-            to={`/customers/${customer.id}`}
-            className="flex flex-col gap-1 rounded-xl border bg-card/80 p-4 hover:bg-accent/30 sm:flex-row sm:items-center sm:justify-between"
-          >
-            <div>
-              <p className="font-medium">{customer.name}</p>
-              <p className="text-sm text-muted-foreground">
-                {customer.phone || "No phone"}
-                {customer.allowsCharge === false ? " · Cash only" : ""}
-                {customer.isSeniorOrPwd ? " · SC/PWD" : ""}
-              </p>
-            </div>
-            <p className="font-medium">{describeBalance(customer.balanceCentavos, "receivable")}</p>
-          </Link>
-        ))}
-      </div>
+      {data && data.customers.length > 0 ? (
+        <div className="overflow-x-auto rounded-lg border border-border">
+          <table className="w-full min-w-[640px] text-sm">
+            <thead>
+              <tr className="border-b border-border bg-muted/40 text-left text-[11px] uppercase tracking-wide text-muted-foreground">
+                <th className="px-3 py-2 font-medium">Customer</th>
+                <th className="px-3 py-2 font-medium">Phone</th>
+                <th className="px-3 py-2 font-medium">Tax</th>
+                <th className="px-3 py-2 text-right font-medium">Balance</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.customers.map((customer) => (
+                <tr key={customer.id} className="border-b border-border/70 last:border-0 hover:bg-muted/30">
+                  <td className="px-3 py-2.5">
+                    <Link to={`/customers/${customer.id}`} className="font-medium hover:underline">
+                      {customer.name}
+                    </Link>
+                    <p className="text-xs text-muted-foreground">
+                      {customer.allowsCharge === false ? "Cash only" : "Charge allowed"}
+                      {customer.isSeniorOrPwd ? " · SC/PWD" : ""}
+                    </p>
+                  </td>
+                  <td className="px-3 py-2.5 text-muted-foreground">{customer.phone || "—"}</td>
+                  <td className="px-3 py-2.5 text-muted-foreground">{customer.taxTreatment ?? "VATABLE"}</td>
+                  <td className="px-3 py-2.5 text-right font-money">
+                    {describeBalance(customer.balanceCentavos, "receivable")}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : null}
     </div>
   );
 }

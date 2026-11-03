@@ -33,7 +33,7 @@ export default function BooksStatementsPage() {
                 <Section title={income.data.expenses.label} rows={income.data.expenses.rows} total={income.data.expenses.totalCentavos} />
                 <div className="flex justify-between border-t pt-2 font-semibold">
                   <span>Net income</span>
-                  <span className="tabular-nums">{formatCentavos(income.data.netIncomeCentavos)}</span>
+                  <span className="font-money">{formatCentavos(income.data.netIncomeCentavos)}</span>
                 </div>
               </>
             ) : (
@@ -80,12 +80,12 @@ function Section({
             {row.code ? `${row.code} ` : ""}
             {row.name}
           </span>
-          <span className="tabular-nums text-foreground">{formatCentavos(row.amountCentavos)}</span>
+          <span className="font-money text-foreground">{formatCentavos(row.amountCentavos)}</span>
         </div>
       ))}
       <div className="flex justify-between font-medium">
         <span>Total</span>
-        <span className="tabular-nums">{formatCentavos(total)}</span>
+        <span className="font-money">{formatCentavos(total)}</span>
       </div>
     </div>
   );

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useOutletContext } from "react-router";
 import { formatCentavos, formatDate } from "@nines/shared";
 import { Field, FormError } from "~/components/field";
-import { EmptyState, LoadingBlock, PageHeader } from "~/components/page";
+import { DataTable, EmptyState, LoadingBlock, PageHeader, Td, Th } from "~/components/page";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
@@ -99,20 +99,30 @@ export default function BooksPayrollPage() {
       {loading ? <LoadingBlock /> : null}
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
       {data && data.entries.length === 0 ? <EmptyState title="No payroll entries yet" description="Record pay when you run payroll for the period." /> : null}
-      <div className="grid gap-2">
-        {data?.entries.map((entry) => (
-          <div key={entry.id} className="rounded-xl border bg-card/80 p-4 sm:flex sm:justify-between">
-            <div>
-              <p className="font-medium">
-                {entry.employeeName} · {formatDate(entry.businessDate)}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                Gross {formatCentavos(entry.grossCentavos)} · Net {formatCentavos(entry.netCentavos)}
-              </p>
-            </div>
-          </div>
-        ))}
-      </div>
+      {data && data.entries.length > 0 ? (
+        <DataTable>
+          <thead>
+            <tr>
+              <Th>Employee</Th>
+              <Th>Date</Th>
+              <Th align="right">Gross</Th>
+              <Th align="right">Net</Th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.entries.map((entry) => (
+              <tr key={entry.id}>
+                <Td>
+                  <span className="font-medium">{entry.employeeName}</span>
+                </Td>
+                <Td className="text-muted-foreground">{formatDate(entry.businessDate)}</Td>
+                <Td align="right">{formatCentavos(entry.grossCentavos)}</Td>
+                <Td align="right">{formatCentavos(entry.netCentavos)}</Td>
+              </tr>
+            ))}
+          </tbody>
+        </DataTable>
+      ) : null}
     </div>
   );
 }

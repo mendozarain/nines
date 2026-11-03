@@ -44,31 +44,33 @@ export default function SalesDetailPage() {
       />
       <Card className="print:border-0 print:shadow-none">
         <CardHeader>
-          <CardTitle className="font-display">{data.buyerName || data.customerName || "Walk-in customer"}</CardTitle>
+          <CardTitle className="text-base font-semibold tracking-tight">
+            {data.buyerName || data.customerName || "Walk-in customer"}
+          </CardTitle>
           <p className="text-sm text-muted-foreground">
             {[data.buyerTin, data.buyerAddress].filter(Boolean).join(" · ") || "No buyer TIN / address on file"}
           </p>
         </CardHeader>
         <CardContent className="grid gap-4">
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto rounded-lg border border-border">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b text-left text-muted-foreground">
-                  <th className="py-2 pr-3 font-medium">Description</th>
-                  <th className="py-2 pr-3 font-medium">Qty</th>
-                  <th className="py-2 pr-3 font-medium">Unit</th>
-                  <th className="py-2 pr-3 font-medium text-right">Price</th>
-                  <th className="py-2 font-medium text-right">Amount</th>
+                <tr className="border-b border-border bg-muted/40 text-left text-[11px] uppercase tracking-wide text-muted-foreground">
+                  <th className="px-3 py-2 font-medium">Description</th>
+                  <th className="px-3 py-2 font-medium">Qty</th>
+                  <th className="px-3 py-2 font-medium">Unit</th>
+                  <th className="px-3 py-2 text-right font-medium">Price</th>
+                  <th className="px-3 py-2 text-right font-medium">Amount</th>
                 </tr>
               </thead>
               <tbody>
                 {data.lines.map((line, index) => (
-                  <tr key={line.id ?? index} className="border-b border-border/60">
-                    <td className="py-2 pr-3">{line.description}</td>
-                    <td className="py-2 pr-3 tabular-nums">{(Number(line.qtyScaled) / 100).toFixed(2)}</td>
-                    <td className="py-2 pr-3">{line.unit}</td>
-                    <td className="py-2 pr-3 text-right tabular-nums">{formatCentavos(line.unitPriceCentavos)}</td>
-                    <td className="py-2 text-right tabular-nums">{formatCentavos(line.amountCentavos)}</td>
+                  <tr key={line.id ?? index} className="border-b border-border/70 last:border-0">
+                    <td className="px-3 py-2.5">{line.description}</td>
+                    <td className="px-3 py-2.5 tabular-nums">{(Number(line.qtyScaled) / 100).toFixed(2)}</td>
+                    <td className="px-3 py-2.5">{line.unit}</td>
+                    <td className="px-3 py-2.5 text-right font-money">{formatCentavos(line.unitPriceCentavos)}</td>
+                    <td className="px-3 py-2.5 text-right font-money">{formatCentavos(line.amountCentavos)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -77,21 +79,21 @@ export default function SalesDetailPage() {
           <div className="ml-auto grid w-full max-w-xs gap-1 text-sm">
             <div className="flex justify-between">
               <span className="text-muted-foreground">Gross</span>
-              <span className="tabular-nums">{formatCentavos(data.grossCentavos)}</span>
+              <span className="font-money">{formatCentavos(data.grossCentavos)}</span>
             </div>
             {data.scPwdDiscountCentavos !== "0" ? (
               <div className="flex justify-between">
                 <span className="text-muted-foreground">SC/PWD discount</span>
-                <span className="tabular-nums">-{formatCentavos(data.scPwdDiscountCentavos)}</span>
+                <span className="font-money">-{formatCentavos(data.scPwdDiscountCentavos)}</span>
               </div>
             ) : null}
             <div className="flex justify-between">
               <span className="text-muted-foreground">VAT</span>
-              <span className="tabular-nums">{formatCentavos(data.vatCentavos)}</span>
+              <span className="font-money">{formatCentavos(data.vatCentavos)}</span>
             </div>
             <div className="flex justify-between text-base font-semibold">
               <span>Total</span>
-              <span className="tabular-nums">{formatCentavos(data.totalCentavos)}</span>
+              <span className="font-money">{formatCentavos(data.totalCentavos)}</span>
             </div>
           </div>
           {data.note ? <p className="text-sm text-muted-foreground">Note: {data.note}</p> : null}

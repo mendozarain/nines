@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useOutletContext } from "react-router";
 import { formatCentavos, formatDate } from "@nines/shared";
 import { Field, FormError } from "~/components/field";
-import { EmptyState, LoadingBlock, PageHeader } from "~/components/page";
+import { DataTable, EmptyState, LoadingBlock, PageHeader, Td, Th } from "~/components/page";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
@@ -84,19 +84,30 @@ export default function BooksAssetsPage() {
       {loading ? <LoadingBlock /> : null}
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
       {data && data.assets.length === 0 ? <EmptyState title="No fixed assets yet" description="Add equipment when you capitalize a purchase." /> : null}
-      <div className="grid gap-2">
-        {data?.assets.map((asset) => (
-          <div key={asset.id} className="rounded-xl border bg-card/80 p-4 sm:flex sm:justify-between">
-            <div>
-              <p className="font-medium">{asset.name}</p>
-              <p className="text-sm text-muted-foreground">
-                Acquired {formatDate(asset.acquiredDate)} · {asset.usefulLifeMonths} months
-              </p>
-            </div>
-            <p className="font-semibold tabular-nums">{formatCentavos(asset.costCentavos)}</p>
-          </div>
-        ))}
-      </div>
+      {data && data.assets.length > 0 ? (
+        <DataTable>
+          <thead>
+            <tr>
+              <Th>Asset</Th>
+              <Th>Acquired</Th>
+              <Th>Life</Th>
+              <Th align="right">Cost</Th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.assets.map((asset) => (
+              <tr key={asset.id}>
+                <Td>
+                  <span className="font-medium">{asset.name}</span>
+                </Td>
+                <Td className="text-muted-foreground">{formatDate(asset.acquiredDate)}</Td>
+                <Td className="text-muted-foreground">{asset.usefulLifeMonths} months</Td>
+                <Td align="right">{formatCentavos(asset.costCentavos)}</Td>
+              </tr>
+            ))}
+          </tbody>
+        </DataTable>
+      ) : null}
     </div>
   );
 }

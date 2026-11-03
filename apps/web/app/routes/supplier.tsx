@@ -3,7 +3,7 @@ import { Link, useOutletContext, useParams } from "react-router";
 import { describeBalance, formatDate } from "@nines/shared";
 import { ConfirmDialog } from "~/components/confirm-dialog";
 import { Field, FormError } from "~/components/field";
-import { LoadingBlock, Money, PageHeader } from "~/components/page";
+import { DataTable, LoadingBlock, Money, PageHeader, Td, Th } from "~/components/page";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
@@ -91,8 +91,10 @@ export default function SupplierPage() {
       />
       <Card>
         <CardContent className="pt-5">
-          <p className="text-sm text-muted-foreground">Balance</p>
-          <p className="text-3xl font-semibold">{describeBalance(data.balanceCentavos, "payable")}</p>
+          <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Balance</p>
+          <p className="mt-2 text-2xl font-semibold tracking-tight font-money">
+            {describeBalance(data.balanceCentavos, "payable")}
+          </p>
           <p className="mt-2 text-sm text-muted-foreground">
             Billed <Money value={data.billsCentavos} /> · Paid <Money value={data.paymentsCentavos} />
           </p>
@@ -150,44 +152,74 @@ export default function SupplierPage() {
         </Card>
       </div>
       <section className="grid gap-2">
-        <h2 className="font-medium">Bills</h2>
+        <h2 className="text-sm font-semibold tracking-tight">Bills</h2>
         {data.bills.length === 0 ? <p className="text-sm text-muted-foreground">No bills yet.</p> : null}
-        {data.bills.map((bill) => (
-          <div key={bill.id} className="flex items-center justify-between gap-3 rounded-xl border bg-card p-4">
-            <div>
-              <p className="font-medium">{bill.reference || "Bill"}</p>
-              <p className="text-sm text-muted-foreground">
-                {formatDate(bill.businessDate)}
-                {bill.dueDate ? ` · due ${formatDate(bill.dueDate)}` : ""}
-                {bill.note ? ` · ${bill.note}` : ""}
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Money value={bill.amountCentavos} className="font-semibold" />
-              <Button type="button" variant="ghost" onClick={() => setTarget({ kind: "bill", id: bill.id })}>
-                Delete
-              </Button>
-            </div>
-          </div>
-        ))}
+        {data.bills.length > 0 ? (
+          <DataTable>
+            <thead>
+              <tr>
+                <Th>Reference</Th>
+                <Th>Date</Th>
+                <Th align="right">Amount</Th>
+                <Th align="right">{""}</Th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.bills.map((bill) => (
+                <tr key={bill.id}>
+                  <Td>
+                    <span className="font-medium">{bill.reference || "Bill"}</span>
+                    {bill.note ? <p className="text-xs text-muted-foreground">{bill.note}</p> : null}
+                  </Td>
+                  <Td className="text-muted-foreground">
+                    {formatDate(bill.businessDate)}
+                    {bill.dueDate ? ` · due ${formatDate(bill.dueDate)}` : ""}
+                  </Td>
+                  <Td align="right">
+                    <Money value={bill.amountCentavos} />
+                  </Td>
+                  <Td align="right">
+                    <Button type="button" variant="ghost" size="sm" onClick={() => setTarget({ kind: "bill", id: bill.id })}>
+                      Delete
+                    </Button>
+                  </Td>
+                </tr>
+              ))}
+            </tbody>
+          </DataTable>
+        ) : null}
       </section>
       <section className="grid gap-2">
-        <h2 className="font-medium">Payments</h2>
+        <h2 className="text-sm font-semibold tracking-tight">Payments</h2>
         {data.payments.length === 0 ? <p className="text-sm text-muted-foreground">No payments yet.</p> : null}
-        {data.payments.map((payment) => (
-          <div key={payment.id} className="flex items-center justify-between gap-3 rounded-xl border bg-card p-4">
-            <div>
-              <p>{formatDate(payment.businessDate)}</p>
-              <p className="text-sm text-muted-foreground">{payment.note || "Payment"}</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Money value={payment.amountCentavos} className="font-semibold" />
-              <Button type="button" variant="ghost" onClick={() => setTarget({ kind: "payment", id: payment.id })}>
-                Delete
-              </Button>
-            </div>
-          </div>
-        ))}
+        {data.payments.length > 0 ? (
+          <DataTable>
+            <thead>
+              <tr>
+                <Th>Date</Th>
+                <Th>Note</Th>
+                <Th align="right">Amount</Th>
+                <Th align="right">{""}</Th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.payments.map((payment) => (
+                <tr key={payment.id}>
+                  <Td className="text-muted-foreground">{formatDate(payment.businessDate)}</Td>
+                  <Td className="text-muted-foreground">{payment.note || "Payment"}</Td>
+                  <Td align="right">
+                    <Money value={payment.amountCentavos} />
+                  </Td>
+                  <Td align="right">
+                    <Button type="button" variant="ghost" size="sm" onClick={() => setTarget({ kind: "payment", id: payment.id })}>
+                      Delete
+                    </Button>
+                  </Td>
+                </tr>
+              ))}
+            </tbody>
+          </DataTable>
+        ) : null}
       </section>
       <ConfirmDialog
         open={Boolean(target)}

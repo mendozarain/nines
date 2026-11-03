@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router";
 import { describeBalance } from "@nines/shared";
 import { Field, FormError } from "~/components/field";
-import { EmptyState, LoadingBlock, PageHeader } from "~/components/page";
+import { DataTable, EmptyState, LoadingBlock, PageHeader, Td, Th } from "~/components/page";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
@@ -73,17 +73,30 @@ export default function PayablesPage() {
       {data && data.suppliers.length === 0 ? (
         <EmptyState title="No suppliers yet" description="Add your fuel supplier to track deliveries and what you still owe." />
       ) : null}
-      <div className="grid gap-2">
-        {data?.suppliers.map((supplier) => (
-          <Link key={supplier.id} to={`/payables/${supplier.id}`} className="flex flex-col gap-1 rounded-xl border bg-card p-4 hover:bg-accent/30 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="font-medium">{supplier.name}</p>
-              <p className="text-sm text-muted-foreground">{supplier.tin || "No TIN"}</p>
-            </div>
-            <p className="font-medium">{describeBalance(supplier.balanceCentavos, "payable")}</p>
-          </Link>
-        ))}
-      </div>
+      {data && data.suppliers.length > 0 ? (
+        <DataTable>
+          <thead>
+            <tr>
+              <Th>Supplier</Th>
+              <Th>TIN</Th>
+              <Th align="right">Balance</Th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.suppliers.map((supplier) => (
+              <tr key={supplier.id} className="hover:bg-muted/30">
+                <Td>
+                  <Link to={`/payables/${supplier.id}`} className="font-medium hover:underline">
+                    {supplier.name}
+                  </Link>
+                </Td>
+                <Td className="text-muted-foreground">{supplier.tin || "—"}</Td>
+                <Td align="right">{describeBalance(supplier.balanceCentavos, "payable")}</Td>
+              </tr>
+            ))}
+          </tbody>
+        </DataTable>
+      ) : null}
     </div>
   );
 }

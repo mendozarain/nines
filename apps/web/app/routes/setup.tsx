@@ -150,7 +150,7 @@ export default function Setup() {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-xl flex-col justify-center p-4">
-      <p className="mb-1 font-display text-2xl font-semibold tracking-tight">Nines</p>
+      <p className="mb-1 text-2xl font-semibold tracking-tight">Nines</p>
       <p className="mb-4 text-sm text-muted-foreground">
         Welcome{me.user ? `, ${me.user.name}` : ""}. A short setup — you can change everything later.
       </p>

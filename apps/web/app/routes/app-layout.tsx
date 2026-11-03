@@ -1,6 +1,5 @@
 /**
- * Design borrowings: Linear (dense calm sidebar, Cmd-K), Stripe Dashboard (KPI clarity),
- * Xero/QB (guided start), Mercury (banking calm), Vercel (type/spacing), shadcn blocks.
+ * Shell redesign: Stripe/Xero job-based nav + Mercury quiet chrome.
  * Full notes: apps/web/DESIGN.md
  */
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -62,9 +61,7 @@ function Nav({ me, onNavigate }: { me: Me; onNavigate?: () => void }) {
     { to: "/sales", label: "Invoices", icon: Receipt },
     { to: "/sales/new", label: "New sale", icon: ShoppingCart },
   ];
-
   const customers: SidebarLink[] = [{ to: "/customers", label: "Customers", icon: Users }];
-
   const inventory: SidebarLink[] = [
     { to: "/items", label: "Items", icon: Package },
     ...(fuel
@@ -77,17 +74,14 @@ function Nav({ me, onNavigate }: { me: Me; onNavigate?: () => void }) {
         ]
       : []),
   ];
-
   const cash: SidebarLink[] = [
     { to: "/cash", label: "Reconciliation", icon: Wallet },
     ...(fuel ? [{ to: "/shifts", label: "Shifts" }] : []),
   ];
-
   const expenses: SidebarLink[] = [
     { to: "/expenses", label: "Expenses", icon: CircleDollarSign },
     { to: "/payables", label: "Suppliers" },
   ];
-
   const books: SidebarLink[] = [
     { to: "/books", label: "Chart of accounts", icon: BookOpen },
     { to: "/books/journal", label: "Journal" },
@@ -96,16 +90,14 @@ function Nav({ me, onNavigate }: { me: Me; onNavigate?: () => void }) {
     { to: "/books/assets", label: "Fixed assets" },
     { to: "/books/payroll", label: "Payroll" },
   ];
-
   const reports: SidebarLink[] = [
     { to: "/reports", label: "Daily / monthly / VAT" },
     { to: "/books/tax-calendar", label: "Tax calendar" },
   ];
-
-  const settings: SidebarLink[] = [{ to: "/station", label: "Business / station", icon: Settings }];
+  const settings: SidebarLink[] = [{ to: "/station", label: "Business", icon: Settings }];
 
   return (
-    <nav className="grid gap-3" aria-label="Main" data-sidebar>
+    <nav className="grid gap-4" aria-label="Main" data-sidebar>
       <NavLink
         to="/"
         end
@@ -113,20 +105,28 @@ function Nav({ me, onNavigate }: { me: Me; onNavigate?: () => void }) {
         className={({ isActive }) =>
           cn(
             "flex items-center gap-2 rounded-md px-2.5 py-1.5 text-sm",
-            isActive ? "bg-accent font-medium text-accent-foreground" : "text-muted-foreground hover:bg-accent/60 hover:text-foreground",
+            isActive
+              ? "bg-secondary font-medium text-foreground"
+              : "text-sidebar-foreground hover:bg-secondary/70 hover:text-foreground",
           )
         }
       >
         <LayoutDashboard className="h-4 w-4 opacity-70" />
-        Dashboard
+        Home
       </NavLink>
       <SidebarGroup label="Sales" icon={ShoppingCart} links={sales} onNavigate={onNavigate} />
       <SidebarGroup label="Customers" icon={Users} links={customers} onNavigate={onNavigate} />
-      <SidebarGroup label={fuel ? "Inventory / Fuel" : "Inventory"} icon={Package} links={inventory} onNavigate={onNavigate} />
+      <SidebarGroup
+        label={fuel ? "Inventory / Fuel" : "Inventory"}
+        icon={Package}
+        links={inventory}
+        defaultOpen={fuel}
+        onNavigate={onNavigate}
+      />
       <SidebarGroup label="Cash" icon={Wallet} links={cash} onNavigate={onNavigate} />
-      <SidebarGroup label="Expenses & suppliers" icon={CircleDollarSign} links={expenses} onNavigate={onNavigate} />
-      <SidebarGroup label="Books" icon={BookOpen} links={books} onNavigate={onNavigate} />
-      <SidebarGroup label="Reports" icon={Receipt} links={reports} onNavigate={onNavigate} />
+      <SidebarGroup label="Expenses" icon={CircleDollarSign} links={expenses} onNavigate={onNavigate} />
+      <SidebarGroup label="Books" icon={BookOpen} links={books} defaultOpen={false} onNavigate={onNavigate} />
+      <SidebarGroup label="Reports" icon={Receipt} links={reports} defaultOpen={false} onNavigate={onNavigate} />
       <SidebarGroup label="Settings" icon={Settings} links={settings} onNavigate={onNavigate} />
     </nav>
   );
@@ -183,15 +183,20 @@ export default function AppLayout({ loaderData }: { loaderData: Me }) {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="app-shell bg-background">
       <a
         href="#main"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-background focus:px-3 focus:py-2"
       >
         Skip to content
       </a>
-      <header className={cn("app-chrome sticky top-0 z-30 border-b bg-background/90 backdrop-blur print-hide", isDesktop && "nines-drag-region")}>
-        <div className="flex h-14 items-center gap-3 px-4">
+      <header
+        className={cn(
+          "app-chrome sticky top-0 z-30 border-b border-border print-hide",
+          isDesktop && "nines-drag-region",
+        )}
+      >
+        <div className="flex h-12 items-center gap-3 px-4">
           <Button
             type="button"
             variant="ghost"
@@ -202,20 +207,23 @@ export default function AppLayout({ loaderData }: { loaderData: Me }) {
           >
             <Menu />
           </Button>
-          <span className="font-display text-lg font-semibold tracking-tight">Nines</span>
-          <span className="hidden truncate text-sm text-muted-foreground sm:inline">{loaderData.station.name}</span>
-          <div className={cn("ml-auto flex items-center gap-1 sm:gap-2", isDesktop && "nines-no-drag")}>
-            <Button type="button" variant="outline" size="sm" className="hidden gap-2 sm:inline-flex" onClick={openPalette}>
+          <div className="flex min-w-0 items-center gap-2">
+            <span className="text-sm font-semibold tracking-tight">Nines</span>
+            <span className="hidden text-border sm:inline">|</span>
+            <span className="hidden truncate text-sm text-muted-foreground sm:inline">{loaderData.station.name}</span>
+          </div>
+          <div className={cn("ml-auto flex items-center gap-1", isDesktop && "nines-no-drag")}>
+            <Button type="button" variant="outline" size="sm" className="hidden h-8 gap-2 sm:inline-flex" onClick={openPalette}>
               <Search className="h-3.5 w-3.5" />
               Search
-              <kbd className="rounded border bg-muted px-1.5 text-[10px] text-muted-foreground">⌘K</kbd>
+              <kbd className="rounded border border-border bg-muted px-1 text-[10px] text-muted-foreground">⌘K</kbd>
             </Button>
             <Button type="button" variant="ghost" size="icon" className="sm:hidden" aria-label="Open command palette" onClick={openPalette}>
               <Search />
             </Button>
             <ThemeToggle />
             <span className="hidden text-sm text-muted-foreground lg:inline">{loaderData.user.name}</span>
-            <Button type="button" variant="ghost" size="sm" onClick={signOut}>
+            <Button type="button" variant="ghost" size="sm" className="h-8" onClick={signOut}>
               <LogOut />
               <span className="hidden sm:inline">Sign out</span>
             </Button>
@@ -225,9 +233,9 @@ export default function AppLayout({ loaderData }: { loaderData: Me }) {
       {menuOpen ? (
         <div className="fixed inset-0 z-40 print-hide md:hidden">
           <button className="absolute inset-0 bg-black/40" aria-label="Close menu" onClick={() => setMenuOpen(false)} />
-          <div className="absolute left-0 top-0 flex h-full w-72 flex-col gap-4 overflow-y-auto bg-sidebar p-4 shadow-lg">
+          <div className="app-sidebar absolute left-0 top-0 flex h-full w-72 flex-col gap-4 overflow-y-auto border-r border-border p-4 shadow-lg">
             <div className="flex items-center justify-between">
-              <span className="font-display font-semibold">{loaderData.station.name}</span>
+              <span className="text-sm font-semibold">{loaderData.station.name}</span>
               <Button type="button" variant="ghost" size="icon" aria-label="Close menu" onClick={() => setMenuOpen(false)}>
                 <X />
               </Button>
@@ -236,11 +244,14 @@ export default function AppLayout({ loaderData }: { loaderData: Me }) {
           </div>
         </div>
       ) : null}
-      <div className="mx-auto grid max-w-7xl md:grid-cols-[220px_minmax(0,1fr)]">
-        <aside className="print-hide hidden min-h-[calc(100vh-3.5rem)] border-r bg-sidebar/80 p-3 md:block" data-sidebar>
+      <div className="mx-auto grid max-w-[1400px] md:grid-cols-[232px_minmax(0,1fr)]">
+        <aside
+          className="app-sidebar print-hide hidden min-h-[calc(100vh-3rem)] border-r border-border p-3 md:block"
+          data-sidebar
+        >
           <Nav me={loaderData} />
         </aside>
-        <main id="main" className="px-4 py-6 md:px-6">
+        <main id="main" className="px-4 py-5 md:px-6 md:py-6">
           <Outlet context={loaderData} />
         </main>
       </div>

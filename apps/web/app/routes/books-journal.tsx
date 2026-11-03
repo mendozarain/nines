@@ -99,10 +99,10 @@ export default function BooksJournalPage() {
       {loading ? <LoadingBlock /> : null}
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
       {data && data.entries.length === 0 ? <EmptyState title="No journal entries yet" description="Post a simple debit/credit when you need a manual adjustment." /> : null}
-      <div className="grid gap-3">
+      <div className="grid gap-2">
         {data?.entries.map((entry) => (
-          <div key={entry.id} className="rounded-xl border bg-card/80 p-4">
-            <p className="font-medium">
+          <div key={entry.id} className="rounded-lg border border-border p-3">
+            <p className="text-sm font-semibold tracking-tight">
               {formatDate(entry.businessDate)} · {entry.reference || "Journal"}
             </p>
             <p className="text-sm text-muted-foreground">{entry.memo || "No memo"}</p>
@@ -112,7 +112,7 @@ export default function BooksJournalPage() {
                   <span>
                     {line.accountCode} {line.accountName || ""}
                   </span>
-                  <span className="tabular-nums">
+                  <span className="font-money">
                     {line.debitCentavos !== "0" ? `Dr ${formatCentavos(line.debitCentavos)}` : `Cr ${formatCentavos(line.creditCentavos)}`}
                   </span>
                 </li>

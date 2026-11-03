@@ -377,7 +377,24 @@ export type Dashboard = {
   monthOutputVatCentavos: string;
   receivablesCentavos: string;
   payablesCentavos: string;
-  series: { date: string; salesCentavos: string }[];
+  series: { date: string; salesCentavos: string; expensesCentavos?: string }[];
+  attention?: {
+    id: string;
+    kind: string;
+    title: string;
+    detail: string;
+    href: string;
+    amountCentavos?: string;
+  }[];
+  activity?: {
+    id: string;
+    kind: "sale" | "expense" | string;
+    title: string;
+    detail: string;
+    date: string;
+    amountCentavos: string;
+    href: string;
+  }[];
 };
 
 export type DailyReport = {

@@ -425,7 +425,7 @@ export function ShiftForm({ shiftId }: { shiftId?: string }) {
               {preview.difference == null || !preview.complete ? <span className="text-sm text-muted-foreground">Enter every closing reading</span> : <OverShort value={preview.difference.toString()} />}
             </p>
           </div>
-          <Button type="submit" size="lg" disabled={saving || readings.length === 0}>
+          <Button type="submit" disabled={saving || readings.length === 0}>
             {saving ? "Saving…" : "Save shift"}
           </Button>
         </div>

@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useOutletContext } from "react-router";
-import { EXPENSE_CATEGORIES, formatDate, formatMonth } from "@nines/shared";
+import { EXPENSE_CATEGORIES, formatCentavos, formatDate, formatMonth } from "@nines/shared";
 import { ConfirmDialog } from "~/components/confirm-dialog";
 import { Field, FormError } from "~/components/field";
-import { EmptyState, LoadingBlock, Money, PageHeader } from "~/components/page";
+import { DataTable, EmptyState, LoadingBlock, Money, PageHeader, Td, Th } from "~/components/page";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
@@ -111,26 +111,38 @@ export default function ExpensesPage() {
       {data && data.expenses.length === 0 ? (
         <EmptyState title="No expenses this month" description="Add wages, bills, and other money that left the station." />
       ) : null}
-      <div className="grid gap-2">
-        {data?.expenses.map((expense) => (
-          <div key={expense.id} className="flex flex-col gap-2 rounded-xl border bg-card p-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="font-medium">{expense.category}</p>
-              <p className="text-sm text-muted-foreground">
-                {formatDate(expense.businessDate)}
-                {expense.payee ? ` · ${expense.payee}` : ""}
-                {expense.note ? ` · ${expense.note}` : ""}
-              </p>
-            </div>
-            <div className="flex items-center justify-between gap-3 sm:justify-end">
-              <Money value={expense.amountCentavos} className="text-lg font-semibold" />
-              <Button type="button" variant="ghost" onClick={() => setDeleteId(expense.id)}>
-                Delete
-              </Button>
-            </div>
-          </div>
-        ))}
-      </div>
+      {data && data.expenses.length > 0 ? (
+        <DataTable>
+          <thead>
+            <tr>
+              <Th>Category</Th>
+              <Th>Date</Th>
+              <Th>Payee / note</Th>
+              <Th align="right">Amount</Th>
+              <Th align="right">{""}</Th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.expenses.map((expense) => (
+              <tr key={expense.id}>
+                <Td>
+                  <span className="font-medium">{expense.category}</span>
+                </Td>
+                <Td className="text-muted-foreground">{formatDate(expense.businessDate)}</Td>
+                <Td className="text-muted-foreground">
+                  {[expense.payee, expense.note].filter(Boolean).join(" · ") || "—"}
+                </Td>
+                <Td align="right">{formatCentavos(expense.amountCentavos)}</Td>
+                <Td align="right">
+                  <Button type="button" variant="ghost" size="sm" onClick={() => setDeleteId(expense.id)}>
+                    Delete
+                  </Button>
+                </Td>
+              </tr>
+            ))}
+          </tbody>
+        </DataTable>
+      ) : null}
       <ConfirmDialog
         open={Boolean(deleteId)}
         title="Delete this expense?"

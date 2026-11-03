@@ -1,5 +1,13 @@
 import { Controller, Get, Query, UseGuards } from "@nestjs/common";
-import { addDays, manilaMonth, manilaToday, payableBalance, receivableBalance, splitInclusiveVat } from "@nines/shared";
+import {
+  addDays,
+  formatCentavos,
+  manilaMonth,
+  manilaToday,
+  payableBalance,
+  receivableBalance,
+  splitInclusiveVat,
+} from "@nines/shared";
 import type { AuthUser } from "./auth";
 import { AuthGuard, cents, CurrentUser, dateOnly, dayString, monthBounds, parseBody, stationFor } from "./common";
 import { prisma } from "./prisma";
@@ -138,21 +146,162 @@ export class ReportsController {
     const receivable = receivableBalance(charges._sum.amountCentavos ?? 0n, payments._sum.amountCentavos ?? 0n);
     const payable = payableBalance(bills._sum.amountCentavos ?? 0n, supplierPayments._sum.amountCentavos ?? 0n);
 
-    const byDay = new Map<string, bigint>();
+    const salesByDay = new Map<string, bigint>();
+    const expensesByDay = new Map<string, bigint>();
     for (let offset = 13; offset >= 0; offset -= 1) {
-      byDay.set(addDays(today, -offset), 0n);
+      const key = addDays(today, -offset);
+      salesByDay.set(key, 0n);
+      expensesByDay.set(key, 0n);
     }
     for (const shift of seriesShifts) {
       const key = dayString(shift.businessDate);
       const amount = shift.readings.reduce((sum, reading) => sum + reading.amountCentavos, 0n);
-      if (byDay.has(key)) byDay.set(key, (byDay.get(key) ?? 0n) + amount);
+      if (salesByDay.has(key)) salesByDay.set(key, (salesByDay.get(key) ?? 0n) + amount);
     }
+    const seriesInvoices = await prisma.salesInvoice.findMany({
+      where: { stationId: station.id, businessDate: { gte: seriesStart, lt: tomorrow } },
+      select: { businessDate: true, totalCentavos: true },
+    });
+    for (const invoice of seriesInvoices) {
+      const key = dayString(invoice.businessDate);
+      if (salesByDay.has(key)) salesByDay.set(key, (salesByDay.get(key) ?? 0n) + invoice.totalCentavos);
+    }
+    const seriesExpenses = await prisma.expense.findMany({
+      where: { stationId: station.id, businessDate: { gte: seriesStart, lt: tomorrow } },
+      select: { businessDate: true, amountCentavos: true },
+    });
+    for (const expense of seriesExpenses) {
+      const key = dayString(expense.businessDate);
+      if (expensesByDay.has(key)) expensesByDay.set(key, (expensesByDay.get(key) ?? 0n) + expense.amountCentavos);
+    }
+
+    const todayInvoices = await prisma.salesInvoice.aggregate({
+      where: { stationId: station.id, businessDate: dateOnly(today) },
+      _sum: { totalCentavos: true },
+    });
+    const todaySales = todaySummary.sales + (todayInvoices._sum.totalCentavos ?? 0n);
+
+    const dueSoonCutoff = dateOnly(addDays(today, 7));
+    const [overdueCharges, billsDueSoon, overLimitCustomers, recentInvoices, recentExpenses] = await Promise.all([
+      prisma.creditCharge.findMany({
+        where: {
+          customer: { stationId: station.id },
+          dueDate: { lt: dateOnly(today) },
+        },
+        include: { customer: true },
+        take: 50,
+      }),
+      prisma.bill.findMany({
+        where: {
+          supplier: { stationId: station.id },
+          dueDate: { gte: dateOnly(today), lte: dueSoonCutoff },
+        },
+        include: { supplier: true },
+        orderBy: { dueDate: "asc" },
+        take: 10,
+      }),
+      prisma.customer.findMany({
+        where: { stationId: station.id, allowsCharge: true, creditLimitCentavos: { gt: 0n } },
+        include: {
+          charges: { select: { amountCentavos: true } },
+          payments: { select: { amountCentavos: true } },
+        },
+      }),
+      prisma.salesInvoice.findMany({
+        where: { stationId: station.id },
+        orderBy: [{ businessDate: "desc" }, { createdAt: "desc" }],
+        take: 6,
+        include: { customer: true },
+      }),
+      prisma.expense.findMany({
+        where: { stationId: station.id },
+        orderBy: [{ businessDate: "desc" }, { createdAt: "desc" }],
+        take: 6,
+      }),
+    ]);
+
+    const overdueByCustomer = new Map<string, { name: string; amount: bigint }>();
+    for (const charge of overdueCharges) {
+      const current = overdueByCustomer.get(charge.customerId) ?? { name: charge.customer.name, amount: 0n };
+      current.amount += charge.amountCentavos;
+      overdueByCustomer.set(charge.customerId, current);
+    }
+    // Rough overdue: ignore payments allocation; still useful as attention signal.
+    const attention: { id: string; kind: string; title: string; detail: string; href: string; amountCentavos?: string }[] = [];
+    for (const [customerId, row] of overdueByCustomer) {
+      if (row.amount <= 0n) continue;
+      attention.push({
+        id: `overdue-${customerId}`,
+        kind: "overdue",
+        title: `${row.name} has overdue charges`,
+        detail: "Past due date on charge sales",
+        href: `/customers/${customerId}`,
+        amountCentavos: cents(row.amount),
+      });
+    }
+    for (const customer of overLimitCustomers) {
+      const charged = customer.charges.reduce((sum, row) => sum + row.amountCentavos, 0n);
+      const paid = customer.payments.reduce((sum, row) => sum + row.amountCentavos, 0n);
+      const balance = charged - paid;
+      if (balance > customer.creditLimitCentavos) {
+        attention.push({
+          id: `limit-${customer.id}`,
+          kind: "credit_limit",
+          title: `${customer.name} is over the credit limit`,
+          detail: `Limit ${formatCentavos(customer.creditLimitCentavos)}`,
+          href: `/customers/${customer.id}`,
+          amountCentavos: cents(balance),
+        });
+      }
+    }
+    for (const bill of billsDueSoon) {
+      attention.push({
+        id: `bill-${bill.id}`,
+        kind: "bill_due",
+        title: `${bill.supplier.name} bill due soon`,
+        detail: bill.dueDate ? `Due ${dayString(bill.dueDate)}` : bill.reference || "Supplier bill",
+        href: `/payables/${bill.supplierId}`,
+        amountCentavos: cents(bill.amountCentavos),
+      });
+    }
+    if (station.vatRegistered) {
+      attention.push({
+        id: "tax-vat",
+        kind: "tax",
+        title: "Check VAT filing calendar",
+        detail: "Confirm current BIR due dates with your accountant",
+        href: "/books/tax-calendar",
+      });
+    }
+
+    const activity = [
+      ...recentInvoices.map((invoice) => ({
+        id: `inv-${invoice.id}`,
+        kind: "sale" as const,
+        title: invoice.customer?.name || invoice.buyerName || invoice.number,
+        detail: `Invoice ${invoice.number}`,
+        date: dayString(invoice.businessDate),
+        amountCentavos: cents(invoice.totalCentavos),
+        href: `/sales/${invoice.id}`,
+      })),
+      ...recentExpenses.map((expense) => ({
+        id: `exp-${expense.id}`,
+        kind: "expense" as const,
+        title: expense.payee || expense.category,
+        detail: expense.category,
+        date: dayString(expense.businessDate),
+        amountCentavos: cents(expense.amountCentavos),
+        href: "/expenses",
+      })),
+    ]
+      .sort((a, b) => b.date.localeCompare(a.date))
+      .slice(0, 8);
 
     return {
       today,
       month,
       vatRegistered: station.vatRegistered,
-      todaySalesCentavos: cents(todaySummary.sales),
+      todaySalesCentavos: cents(todaySales),
       todayExpensesCentavos: cents(todayExpenses),
       todayOverShortCentavos: cents(todaySummary.overShort),
       monthSalesCentavos: cents(monthSummary.sales + invoiceSplits.grossCentavos),
@@ -161,10 +310,13 @@ export class ReportsController {
       monthOutputVatCentavos: cents(vat.vatCentavos),
       receivablesCentavos: cents(receivable),
       payablesCentavos: cents(payable),
-      series: [...byDay.entries()].map(([date, salesCentavos]) => ({
+      series: [...salesByDay.entries()].map(([date, salesCentavos]) => ({
         date,
         salesCentavos: cents(salesCentavos),
+        expensesCentavos: cents(expensesByDay.get(date) ?? 0n),
       })),
+      attention: attention.slice(0, 8),
+      activity,
     };
   }
 

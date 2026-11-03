@@ -133,9 +133,9 @@ export default function ReportsPage() {
 
 function Summary({ label, value }: { label: string; value: ReactNode }) {
   return (
-    <div className="rounded-xl border bg-card p-4">
-      <p className="text-sm text-muted-foreground">{label}</p>
-      <p className="mt-1 text-xl font-semibold">{value}</p>
+    <div className="rounded-lg border border-border bg-card p-4">
+      <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
+      <p className="mt-2 text-xl font-semibold tracking-tight">{value}</p>
     </div>
   );
 }
@@ -143,29 +143,27 @@ function Summary({ label, value }: { label: string; value: ReactNode }) {
 function ProductTable({ products }: { products: { name: string; litresCentilitres: string; amountCentavos: string }[] }) {
   if (products.length === 0) return null;
   return (
-    <Card>
-      <CardContent className="pt-5">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Fuel</TableHead>
-              <TableHead>Litres</TableHead>
-              <TableHead>Amount</TableHead>
+    <div className="overflow-x-auto rounded-lg border border-border">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Fuel</TableHead>
+            <TableHead className="text-right">Litres</TableHead>
+            <TableHead className="text-right">Amount</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {products.map((product) => (
+            <TableRow key={product.name}>
+              <TableCell>{product.name}</TableCell>
+              <TableCell className="text-right tabular-nums">{formatLitres(product.litresCentilitres)}</TableCell>
+              <TableCell className="text-right">
+                <Money value={product.amountCentavos} />
+              </TableCell>
             </TableRow>
-          </TableHeader>
-          <TableBody>
-            {products.map((product) => (
-              <TableRow key={product.name}>
-                <TableCell>{product.name}</TableCell>
-                <TableCell className="tabular-nums">{formatLitres(product.litresCentilitres)}</TableCell>
-                <TableCell>
-                  <Money value={product.amountCentavos} />
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   );
 }

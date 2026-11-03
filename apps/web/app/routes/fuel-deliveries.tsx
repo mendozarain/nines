@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { formatDate, formatLitres } from "@nines/shared";
 import { Field, FormError } from "~/components/field";
-import { EmptyState, LoadingBlock, PageHeader } from "~/components/page";
+import { DataTable, EmptyState, LoadingBlock, PageHeader, Td, Th } from "~/components/page";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
@@ -111,23 +111,33 @@ export default function FuelDeliveriesPage() {
       {data && data.deliveries.length === 0 ? (
         <EmptyState title="No deliveries yet" description="Log the next fuel drop when the truck arrives." />
       ) : null}
-      <div className="grid gap-2">
-        {data?.deliveries.map((delivery) => (
-          <div key={delivery.id} className="rounded-xl border bg-card/80 p-4">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="font-medium">
-                {formatDate(delivery.businessDate)} · {delivery.tankName || delivery.tankId}
-              </p>
-              <p className="text-sm tabular-nums">{formatLitres(delivery.measuredLitresCentilitres)} L measured</p>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              DR {formatLitres(delivery.drLitresCentilitres)} L
-              {delivery.invoiceReference ? ` · ${delivery.invoiceReference}` : ""}
-              {delivery.note ? ` · ${delivery.note}` : ""}
-            </p>
-          </div>
-        ))}
-      </div>
+      {data && data.deliveries.length > 0 ? (
+        <DataTable>
+          <thead>
+            <tr>
+              <Th>Date / tank</Th>
+              <Th>Reference</Th>
+              <Th align="right">DR litres</Th>
+              <Th align="right">Measured</Th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.deliveries.map((delivery) => (
+              <tr key={delivery.id}>
+                <Td>
+                  <span className="font-medium">
+                    {formatDate(delivery.businessDate)} · {delivery.tankName || delivery.tankId}
+                  </span>
+                  {delivery.note ? <p className="text-xs text-muted-foreground">{delivery.note}</p> : null}
+                </Td>
+                <Td className="text-muted-foreground">{delivery.invoiceReference || "—"}</Td>
+                <Td className="text-right tabular-nums">{formatLitres(delivery.drLitresCentilitres)} L</Td>
+                <Td className="text-right tabular-nums">{formatLitres(delivery.measuredLitresCentilitres)} L</Td>
+              </tr>
+            ))}
+          </tbody>
+        </DataTable>
+      ) : null}
     </div>
   );
 }

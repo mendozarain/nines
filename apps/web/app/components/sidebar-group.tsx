@@ -31,34 +31,34 @@ export function SidebarGroup({
     <div className="grid gap-0.5">
       <button
         type="button"
-        className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground hover:text-foreground"
+        className="flex w-full items-center gap-2 rounded-md px-2 py-1 text-left text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground hover:text-foreground"
         onClick={() => setOpen((value) => !value)}
         aria-expanded={open}
       >
-        {Icon ? <Icon className="h-3.5 w-3.5 shrink-0" /> : null}
+        {Icon ? <Icon className="h-3.5 w-3.5 shrink-0 opacity-70" /> : null}
         <span className="flex-1 truncate">{label}</span>
-        <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", open ? "rotate-0" : "-rotate-90")} />
+        <ChevronDown className={cn("h-3.5 w-3.5 opacity-60 transition-transform", open ? "rotate-0" : "-rotate-90")} />
       </button>
       {open ? (
-        <div className="grid gap-0.5 pl-1">
+        <div className="grid gap-0.5">
           {links.map((link) => {
             const LinkIcon = link.icon;
             return (
               <NavLink
-                key={link.to}
+                key={`${link.to}-${link.label}`}
                 to={link.to}
                 end={link.end}
                 onClick={onNavigate}
                 className={({ isActive }) =>
                   cn(
-                    "flex items-center gap-2 rounded-md px-2.5 py-1.5 text-sm",
+                    "flex items-center gap-2 rounded-md px-2.5 py-1.5 text-[13px]",
                     isActive
-                      ? "bg-accent font-medium text-accent-foreground"
-                      : "text-sidebar-foreground/80 hover:bg-accent/60 hover:text-foreground",
+                      ? "bg-secondary font-medium text-foreground"
+                      : "text-sidebar-foreground hover:bg-secondary/70 hover:text-foreground",
                   )
                 }
               >
-                {LinkIcon ? <LinkIcon className="h-4 w-4 shrink-0 opacity-70" /> : null}
+                {LinkIcon ? <LinkIcon className="h-3.5 w-3.5 shrink-0 opacity-60" /> : <span className="w-3.5" />}
                 <span className="truncate">{link.label}</span>
               </NavLink>
             );

@@ -52,30 +52,32 @@ export default function BooksPage() {
       {data && data.accounts.length === 0 ? (
         <EmptyState title="No accounts yet" description="Accounts are created when you finish setup." />
       ) : null}
-      <div className="overflow-x-auto rounded-xl border bg-card/80">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b text-left text-muted-foreground">
-              <th className="px-4 py-3 font-medium">Code</th>
-              <th className="px-4 py-3 font-medium">Account</th>
-              <th className="px-4 py-3 font-medium">Type</th>
-              <th className="px-4 py-3 font-medium text-right">Balance</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data?.accounts.map((account) => (
-              <tr key={account.code} className="border-b border-border/50">
-                <td className="px-4 py-2 tabular-nums text-muted-foreground">{account.code}</td>
-                <td className="px-4 py-2">{account.name}</td>
-                <td className="px-4 py-2 text-muted-foreground">{account.type}</td>
-                <td className="px-4 py-2 text-right tabular-nums">
-                  {account.balanceCentavos != null ? formatCentavos(account.balanceCentavos) : "—"}
-                </td>
+      {data && data.accounts.length > 0 ? (
+        <div className="overflow-x-auto rounded-lg border border-border">
+          <table className="w-full min-w-[480px] text-sm">
+            <thead>
+              <tr className="border-b border-border bg-muted/40 text-left text-[11px] uppercase tracking-wide text-muted-foreground">
+                <th className="px-3 py-2 font-medium">Code</th>
+                <th className="px-3 py-2 font-medium">Account</th>
+                <th className="px-3 py-2 font-medium">Type</th>
+                <th className="px-3 py-2 text-right font-medium">Balance</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {data.accounts.map((account) => (
+                <tr key={account.code} className="border-b border-border/70 last:border-0">
+                  <td className="px-3 py-2.5 tabular-nums text-muted-foreground">{account.code}</td>
+                  <td className="px-3 py-2.5">{account.name}</td>
+                  <td className="px-3 py-2.5 text-muted-foreground">{account.type}</td>
+                  <td className="px-3 py-2.5 text-right font-money">
+                    {account.balanceCentavos != null ? formatCentavos(account.balanceCentavos) : "—"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -11,15 +11,15 @@ export function AuthShell({
   children: ReactNode;
 }) {
   return (
-    <main className="flex min-h-screen items-center justify-center p-4">
+    <main className="flex min-h-screen items-center justify-center bg-background p-4">
       <div className="w-full max-w-md">
         <div className="mb-6">
-          <p className="font-display text-3xl font-semibold tracking-tight">Nines</p>
-          <p className="mt-1 text-sm text-muted-foreground">Small-business books for the Philippines</p>
+          <p className="text-2xl font-semibold tracking-tight">Nines</p>
+          <p className="mt-1 text-sm text-muted-foreground">Books for Philippine small businesses</p>
         </div>
-        <Card className="border-border/80 bg-card/90 shadow-sm">
-          <CardHeader>
-            <CardTitle className="text-xl">{title}</CardTitle>
+        <Card className="border-border shadow-none">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg font-semibold tracking-tight">{title}</CardTitle>
             <CardDescription>{subtitle}</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">{children}</CardContent>

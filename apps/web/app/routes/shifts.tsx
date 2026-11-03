@@ -1,6 +1,6 @@
 import { Link } from "react-router";
-import { formatDate } from "@nines/shared";
-import { EmptyState, LoadingBlock, Money, OverShort, PageHeader } from "~/components/page";
+import { formatCentavos, formatDate } from "@nines/shared";
+import { DataTable, EmptyState, LoadingBlock, OverShort, PageHeader, Td, Th } from "~/components/page";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { useFetch } from "~/lib/use-fetch";
@@ -46,20 +46,32 @@ export default function ShiftsPage() {
       {[...groups.entries()].map(([date, shifts]) => (
         <section key={date} className="grid gap-2">
           <h2 className="text-sm font-medium text-muted-foreground">{formatDate(date)}</h2>
-          <div className="grid gap-2">
-            {shifts.map((shift) => (
-              <Link key={shift.id} to={`/shifts/${shift.id}`} className="flex flex-col gap-2 rounded-xl border bg-card p-4 shadow-sm hover:bg-accent/30 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-center gap-2">
-                  <Badge>{shift.name}</Badge>
-                  <span className="text-sm text-muted-foreground">{shift.readings.length} pumps</span>
-                </div>
-                <div className="flex items-center justify-between gap-6 sm:justify-end">
-                  <Money value={shift.expectedCentavos} className="text-lg font-semibold" />
-                  <OverShort value={shift.overShortCentavos} />
-                </div>
-              </Link>
-            ))}
-          </div>
+          <DataTable>
+            <thead>
+              <tr>
+                <Th>Shift</Th>
+                <Th>Pumps</Th>
+                <Th align="right">Expected</Th>
+                <Th align="right">Over / short</Th>
+              </tr>
+            </thead>
+            <tbody>
+              {shifts.map((shift) => (
+                <tr key={shift.id} className="hover:bg-muted/30">
+                  <Td>
+                    <Link to={`/shifts/${shift.id}`} className="inline-flex items-center gap-2 hover:underline">
+                      <Badge>{shift.name}</Badge>
+                    </Link>
+                  </Td>
+                  <Td className="text-muted-foreground">{shift.readings.length}</Td>
+                  <Td align="right">{formatCentavos(shift.expectedCentavos)}</Td>
+                  <Td align="right">
+                    <OverShort value={shift.overShortCentavos} />
+                  </Td>
+                </tr>
+              ))}
+            </tbody>
+          </DataTable>
         </section>
       ))}
     </div>

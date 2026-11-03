@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useOutletContext } from "react-router";
 import { describeOverShort, formatCentavos, formatDate } from "@nines/shared";
 import { Field, FormError } from "~/components/field";
-import { EmptyState, LoadingBlock, PageHeader } from "~/components/page";
+import { DataTable, EmptyState, LoadingBlock, PageHeader, Td, Th } from "~/components/page";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
@@ -95,7 +95,7 @@ export default function CashPage() {
               <Input id="note" name="note" />
             </Field>
             <div className="self-end">
-              <Button type="submit" size="lg" disabled={pending}>
+              <Button type="submit" disabled={pending}>
                 {pending ? "Saving…" : "Save reconciliation"}
               </Button>
             </div>
@@ -107,23 +107,34 @@ export default function CashPage() {
       {data && data.reconciliations.length === 0 ? (
         <EmptyState title="No reconciliations yet" description="When you close the day, count the cash and save it here." />
       ) : null}
-      <div className="grid gap-2">
-        {data?.reconciliations.map((row) => (
-          <div key={row.id} className="rounded-xl border bg-card/80 p-4 sm:flex sm:items-center sm:justify-between">
-            <div>
-              <p className="font-medium">
-                {formatDate(row.businessDate)} · {row.shiftName || "Day"}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                {row.cashier || "Cashier"} · Sales {formatCentavos(row.cashSalesCentavos)}
-              </p>
-            </div>
-            <p className="font-medium">
-              {row.overShortCentavos != null ? describeOverShort(row.overShortCentavos).label : "Saved"}
-            </p>
-          </div>
-        ))}
-      </div>
+      {data && data.reconciliations.length > 0 ? (
+        <DataTable>
+          <thead>
+            <tr>
+              <Th>Date / period</Th>
+              <Th>Cashier</Th>
+              <Th align="right">Cash sales</Th>
+              <Th align="right">Over / short</Th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.reconciliations.map((row) => (
+              <tr key={row.id}>
+                <Td>
+                  <span className="font-medium">
+                    {formatDate(row.businessDate)} · {row.shiftName || "Day"}
+                  </span>
+                </Td>
+                <Td className="text-muted-foreground">{row.cashier || "Cashier"}</Td>
+                <Td align="right">{formatCentavos(row.cashSalesCentavos)}</Td>
+                <Td align="right">
+                  {row.overShortCentavos != null ? describeOverShort(row.overShortCentavos).label : "Saved"}
+                </Td>
+              </tr>
+            ))}
+          </tbody>
+        </DataTable>
+      ) : null}
     </div>
   );
 }

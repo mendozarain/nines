@@ -28,8 +28,8 @@ export default function BooksTaxCalendarPage() {
       {data && data.items.length === 0 ? <EmptyState title="No calendar items" description="Tax calendar items will appear here." /> : null}
       <div className="grid gap-2">
         {data?.items.map((item) => (
-          <div key={item.area} className="rounded-xl border bg-card/80 p-4">
-            <p className="font-medium">{item.area}</p>
+          <div key={item.area} className="rounded-lg border border-border p-3">
+            <p className="text-sm font-semibold tracking-tight">{item.area}</p>
             <p className="mt-1 text-sm">{item.record}</p>
             <p className="mt-1 text-sm text-muted-foreground">When: {item.frequency}</p>
             <p className="mt-1 text-sm text-muted-foreground">{item.caution}</p>

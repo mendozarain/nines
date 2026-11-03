@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { TAX_TREATMENT_LABELS, TAX_TREATMENTS, formatCentavos } from "@nines/shared";
 import { Field, FormError } from "~/components/field";
-import { EmptyState, LoadingBlock, PageHeader } from "~/components/page";
+import { DataTable, EmptyState, LoadingBlock, PageHeader, Td, Th } from "~/components/page";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
@@ -87,20 +87,33 @@ export default function ItemsPage() {
       {data && data.items.length === 0 ? (
         <EmptyState title="No items yet" description="Add products or services so cashiers can pick them on a sale." />
       ) : null}
-      <div className="grid gap-2">
-        {data?.items.map((item) => (
-          <div key={item.id} className="flex flex-col gap-1 rounded-xl border bg-card/80 p-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="font-medium">{item.name}</p>
-              <p className="text-sm text-muted-foreground">
-                {item.unit} · {TAX_TREATMENT_LABELS[item.taxType as keyof typeof TAX_TREATMENT_LABELS] ?? item.taxType}
-                {item.active === false ? " · Inactive" : ""}
-              </p>
-            </div>
-            <p className="font-semibold tabular-nums">{formatCentavos(item.priceCentavos)}</p>
-          </div>
-        ))}
-      </div>
+      {data && data.items.length > 0 ? (
+        <DataTable>
+          <thead>
+            <tr>
+              <Th>Item</Th>
+              <Th>Unit</Th>
+              <Th>Tax</Th>
+              <Th align="right">Price</Th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.items.map((item) => (
+              <tr key={item.id}>
+                <Td>
+                  <span className="font-medium">{item.name}</span>
+                  {item.active === false ? <p className="text-xs text-muted-foreground">Inactive</p> : null}
+                </Td>
+                <Td className="text-muted-foreground">{item.unit}</Td>
+                <Td className="text-muted-foreground">
+                  {TAX_TREATMENT_LABELS[item.taxType as keyof typeof TAX_TREATMENT_LABELS] ?? item.taxType}
+                </Td>
+                <Td align="right">{formatCentavos(item.priceCentavos)}</Td>
+              </tr>
+            ))}
+          </tbody>
+        </DataTable>
+      ) : null}
     </div>
   );
 }

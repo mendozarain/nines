@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { formatLitres } from "@nines/shared";
 import { Field, FormError } from "~/components/field";
-import { EmptyState, LoadingBlock, PageHeader } from "~/components/page";
+import { DataTable, EmptyState, LoadingBlock, PageHeader, Td, Th } from "~/components/page";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
@@ -88,20 +88,32 @@ export default function FuelTanksPage() {
       {loading ? <LoadingBlock /> : null}
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
       {data && data.tanks.length === 0 ? <EmptyState title="No tanks yet" description="Add a tank for each fuel storage vessel on site." /> : null}
-      <div className="grid gap-2">
-        {data?.tanks.map((tank) => (
-          <div key={tank.id} className="rounded-xl border bg-card/80 p-4 sm:flex sm:items-center sm:justify-between">
-            <div>
-              <p className="font-medium">{tank.name}</p>
-              <p className="text-sm text-muted-foreground">{tank.productName || tank.productId}</p>
-            </div>
-            <p className="text-sm tabular-nums">
-              Book {formatLitres(tank.bookCentilitres)} L
-              {tank.capacityCentilitres !== "0" ? ` / ${formatLitres(tank.capacityCentilitres)} L` : ""}
-            </p>
-          </div>
-        ))}
-      </div>
+      {data && data.tanks.length > 0 ? (
+        <DataTable>
+          <thead>
+            <tr>
+              <Th>Tank</Th>
+              <Th>Fuel</Th>
+              <Th align="right">Book litres</Th>
+              <Th align="right">Capacity</Th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.tanks.map((tank) => (
+              <tr key={tank.id}>
+                <Td>
+                  <span className="font-medium">{tank.name}</span>
+                </Td>
+                <Td className="text-muted-foreground">{tank.productName || tank.productId}</Td>
+                <Td className="text-right tabular-nums">{formatLitres(tank.bookCentilitres)} L</Td>
+                <Td className="text-right tabular-nums">
+                  {tank.capacityCentilitres !== "0" ? `${formatLitres(tank.capacityCentilitres)} L` : "—"}
+                </Td>
+              </tr>
+            ))}
+          </tbody>
+        </DataTable>
+      ) : null}
     </div>
   );
 }
