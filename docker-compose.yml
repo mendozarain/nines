@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: nines-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: nines
+      POSTGRES_PASSWORD: nines
+      POSTGRES_DB: nines
+    volumes:
+      - nines_pgdata:/var/lib/postgresql/data
+      - ./docker/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nines -d nines"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  nines_pgdata:

@@ -11,3 +11,10 @@ cdk.out/
 apps/api/src/generated/
 .lambda/
 infra/cdk-outputs.json
+infra/lambda-asset/
+playwright-report/
+test-results/
+blob-report/
+coverage/
+*.tsbuildinfo
+.vite/

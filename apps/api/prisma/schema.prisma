@@ -1,0 +1,595 @@
+generator client {
+  provider      = "prisma-client"
+  output        = "../src/generated/prisma"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Better Auth tables. Model names stay PascalCase; table names stay lowercase.
+
+model User {
+  id            String    @id
+  name          String
+  email         String
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+  station       Station?
+
+  @@unique([email])
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+/// The owner's business. Table name stays Station for the already-deployed DB.
+model Station {
+  id                 String               @id @default(cuid())
+  name               String
+  tin                String
+  address            String
+  vatRegistered      Boolean              @default(true)
+  /// GENERAL | RETAIL | SERVICES | FUEL_STATION
+  industry           String               @default("FUEL_STATION")
+  fuelModuleEnabled  Boolean              @default(true)
+  /// VAT | PERCENTAGE_TAX (non-VAT registered businesses)
+  taxRegime          String               @default("VAT")
+  percentageTaxRateBps Int                @default(300)
+  ownerId            String               @unique
+  owner              User                 @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  products           FuelProduct[]
+  pumps              Pump[]
+  shifts             Shift[]
+  expenses           Expense[]
+  customers          Customer[]
+  suppliers          Supplier[]
+  items              Item[]
+  salesInvoices      SalesInvoice[]
+  tanks              Tank[]
+  fuelDeliveries     FuelDelivery[]
+  tankDips           TankDip[]
+  cashReconciliations CashReconciliation[]
+  ledgerAccounts     LedgerAccount[]
+  journalEntries     JournalEntry[]
+  fixedAssets        FixedAsset[]
+  payrollEntries     PayrollEntry[]
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+}
+
+model FuelProduct {
+  id                    String         @id @default(cuid())
+  stationId             String
+  station               Station        @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  name                  String
+  pricePerLitreCentavos BigInt
+  active                Boolean        @default(true)
+  sortOrder             Int            @default(0)
+  pumps                 Pump[]
+  tanks                 Tank[]
+  deliveries            FuelDelivery[]
+  dips                  TankDip[]
+  invoiceLines          SalesInvoiceLine[]
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+
+  @@index([stationId])
+}
+
+model Pump {
+  id        String         @id @default(cuid())
+  stationId String
+  station   Station        @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  productId String
+  product   FuelProduct    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name      String
+  active    Boolean        @default(true)
+  sortOrder Int            @default(0)
+  readings  ShiftReading[]
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@index([stationId])
+}
+
+model Shift {
+  id             String              @id @default(cuid())
+  stationId      String
+  station        Station             @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  businessDate   DateTime            @db.Date
+  name           String
+  sortOrder      Int
+  cashCentavos   BigInt
+  cardCentavos   BigInt
+  creditCentavos BigInt
+  notes          String              @default("")
+  readings       ShiftReading[]
+  charges        CreditCharge[]
+  salesInvoices  SalesInvoice[]
+  cashRecon      CashReconciliation?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  @@unique([stationId, businessDate, name])
+  @@index([stationId, businessDate])
+}
+
+model ShiftReading {
+  id                    String @id @default(cuid())
+  shiftId               String
+  shift                 Shift  @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+  pumpId                String
+  pump                  Pump   @relation(fields: [pumpId], references: [id], onDelete: Cascade)
+  openingCentilitres    BigInt
+  closingCentilitres    BigInt
+  litresCentilitres     BigInt
+  pricePerLitreCentavos BigInt
+  amountCentavos        BigInt
+
+  @@unique([shiftId, pumpId])
+}
+
+model Customer {
+  id                     String            @id @default(cuid())
+  stationId              String
+  station                Station           @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  /// INDIVIDUAL | ORGANIZATION
+  type                   String            @default("INDIVIDUAL")
+  name                   String
+  contactPerson          String            @default("")
+  tin                    String            @default("")
+  address                String            @default("")
+  phone                  String            @default("")
+  email                  String            @default("")
+  notes                  String            @default("")
+  allowsCharge           Boolean           @default(false)
+  creditLimitCentavos    BigInt            @default(0)
+  paymentTermsDays       Int               @default(0)
+  /// VATABLE | VAT_EXEMPT | ZERO_RATED
+  taxTreatment           String            @default("VATABLE")
+  taxExemptReason        String            @default("")
+  taxExemptReference     String            @default("")
+  taxExemptExpiry        DateTime?         @db.Date
+  isSeniorOrPwd          Boolean           @default(false)
+  seniorPwdIdNumber      String            @default("")
+  /// Withholding rate in basis points (100 = 1%, 200 = 2%)
+  withholdingRateBps     Int               @default(0)
+  charges                CreditCharge[]
+  payments               CustomerPayment[]
+  salesInvoices          SalesInvoice[]
+  createdAt              DateTime          @default(now())
+  updatedAt              DateTime          @updatedAt
+
+  @@index([stationId])
+}
+
+model CreditCharge {
+  id             String        @id @default(cuid())
+  customerId     String
+  customer       Customer      @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  shiftId        String?
+  shift          Shift?        @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+  invoiceId      String?
+  invoice        SalesInvoice? @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  businessDate   DateTime      @db.Date
+  dueDate        DateTime?     @db.Date
+  amountCentavos BigInt
+  note           String        @default("")
+  createdAt      DateTime      @default(now())
+
+  @@index([customerId])
+  @@index([shiftId])
+  @@index([invoiceId])
+}
+
+model CustomerPayment {
+  id                   String   @id @default(cuid())
+  customerId           String
+  customer             Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  businessDate         DateTime @db.Date
+  amountCentavos       BigInt
+  withholdingCentavos  BigInt   @default(0)
+  bir2307Reference     String   @default("")
+  note                 String   @default("")
+  createdAt            DateTime @default(now())
+
+  @@index([customerId])
+}
+
+model Item {
+  id             String             @id @default(cuid())
+  stationId      String
+  station        Station            @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  name           String
+  unit           String             @default("pc")
+  priceCentavos  BigInt
+  /// VATABLE | VAT_EXEMPT | ZERO_RATED
+  taxType        String             @default("VATABLE")
+  active         Boolean            @default(true)
+  sortOrder      Int                @default(0)
+  stockQtyScaled BigInt             @default(0)
+  invoiceLines   SalesInvoiceLine[]
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  @@index([stationId])
+}
+
+model SalesInvoice {
+  id                   String             @id @default(cuid())
+  stationId            String
+  station              Station            @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  number               String
+  businessDate         DateTime           @db.Date
+  customerId           String?
+  customer             Customer?          @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  shiftId              String?
+  shift                Shift?             @relation(fields: [shiftId], references: [id], onDelete: SetNull)
+  /// CASH | CARD | EWALLET | CHARGE
+  paymentMethod        String             @default("CASH")
+  buyerName            String             @default("")
+  buyerTin             String             @default("")
+  buyerAddress         String             @default("")
+  /// VATABLE | VAT_EXEMPT | ZERO_RATED
+  taxTreatment         String             @default("VATABLE")
+  isSeniorOrPwd        Boolean            @default(false)
+  seniorPwdIdNumber    String             @default("")
+  discountCentavos     BigInt             @default(0)
+  scPwdDiscountCentavos BigInt            @default(0)
+  grossCentavos        BigInt             @default(0)
+  vatCentavos          BigInt             @default(0)
+  netCentavos          BigInt              @default(0)
+  totalCentavos        BigInt              @default(0)
+  note                 String             @default("")
+  lines                SalesInvoiceLine[]
+  charges              CreditCharge[]
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  @@unique([stationId, number])
+  @@index([stationId, businessDate])
+  @@index([customerId])
+}
+
+model SalesInvoiceLine {
+  id             String       @id @default(cuid())
+  invoiceId      String
+  invoice        SalesInvoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  itemId         String?
+  item           Item?        @relation(fields: [itemId], references: [id], onDelete: SetNull)
+  fuelProductId  String?
+  fuelProduct    FuelProduct? @relation(fields: [fuelProductId], references: [id], onDelete: SetNull)
+  description    String
+  unit           String       @default("pc")
+  /// Quantity scaled by 100 (centilitres for fuel, hundredths of a unit otherwise)
+  qtyScaled      BigInt
+  unitPriceCentavos BigInt
+  amountCentavos BigInt
+  vatCentavos    BigInt       @default(0)
+
+  @@index([invoiceId])
+}
+
+model Tank {
+  id                   String         @id @default(cuid())
+  stationId            String
+  station              Station        @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  productId            String
+  product              FuelProduct    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name                 String
+  capacityCentilitres  BigInt         @default(0)
+  bookCentilitres      BigInt         @default(0)
+  avgCostPerLitreCentavos BigInt      @default(0)
+  active               Boolean        @default(true)
+  deliveries           FuelDelivery[]
+  dips                 TankDip[]
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+
+  @@index([stationId])
+}
+
+model FuelDelivery {
+  id                      String      @id @default(cuid())
+  stationId               String
+  station                 Station     @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  supplierId              String?
+  supplier                Supplier?   @relation(fields: [supplierId], references: [id], onDelete: SetNull)
+  productId               String
+  product                 FuelProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
+  tankId                  String
+  tank                    Tank        @relation(fields: [tankId], references: [id], onDelete: Cascade)
+  businessDate            DateTime    @db.Date
+  invoiceReference        String      @default("")
+  drLitresCentilitres     BigInt
+  measuredLitresCentilitres BigInt
+  unitCostPerLitreCentavos BigInt
+  freightCentavos         BigInt      @default(0)
+  inputVatCentavos        BigInt      @default(0)
+  withholdingCentavos     BigInt      @default(0)
+  dueDate                 DateTime?   @db.Date
+  receivedBy              String      @default("")
+  checkedBy               String      @default("")
+  note                    String      @default("")
+  billId                  String?
+  createdAt               DateTime    @default(now())
+  updatedAt               DateTime    @updatedAt
+
+  @@index([stationId, businessDate])
+  @@index([tankId])
+}
+
+model TankDip {
+  id                   String      @id @default(cuid())
+  stationId            String
+  station              Station     @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  tankId               String
+  tank                 Tank        @relation(fields: [tankId], references: [id], onDelete: Cascade)
+  productId            String
+  product              FuelProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
+  businessDate         DateTime    @db.Date
+  openingCentilitres   BigInt
+  deliveriesCentilitres BigInt     @default(0)
+  salesCentilitres     BigInt      @default(0)
+  bookClosingCentilitres BigInt
+  physicalCentilitres  BigInt
+  avgCostPerLitreCentavos BigInt   @default(0)
+  investigatedBy       String      @default("")
+  note                 String      @default("")
+  createdAt            DateTime    @default(now())
+
+  @@index([stationId, businessDate])
+  @@index([tankId])
+}
+
+model CashReconciliation {
+  id                    String    @id @default(cuid())
+  stationId             String
+  station               Station   @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  businessDate          DateTime  @db.Date
+  shiftId               String?   @unique
+  shift                 Shift?    @relation(fields: [shiftId], references: [id], onDelete: SetNull)
+  shiftName             String    @default("")
+  cashier               String    @default("")
+  openingFloatCentavos  BigInt    @default(0)
+  cashSalesCentavos     BigInt    @default(0)
+  otherReceiptsCentavos BigInt    @default(0)
+  paidOutCentavos       BigInt     @default(0)
+  countedCentavos       BigInt     @default(0)
+  depositCentavos       BigInt     @default(0)
+  depositDate           DateTime? @db.Date
+  bankReference         String    @default("")
+  reviewedBy            String    @default("")
+  note                  String    @default("")
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([stationId, businessDate])
+}
+
+model Expense {
+  id               String    @id @default(cuid())
+  stationId        String
+  station          Station   @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  category         String
+  payee            String    @default("")
+  businessDate     DateTime  @db.Date
+  amountCentavos   BigInt
+  netCentavos      BigInt    @default(0)
+  inputVatCentavos BigInt    @default(0)
+  withholdingCentavos BigInt @default(0)
+  invoiceReference String    @default("")
+  accountCode      String    @default("")
+  note             String    @default("")
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([stationId, businessDate])
+}
+
+model Supplier {
+  id             String         @id @default(cuid())
+  stationId      String
+  station        Station        @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  name           String
+  tin            String         @default("")
+  notes          String         @default("")
+  bills          Bill[]
+  payments       SupplierPayment[]
+  fuelDeliveries FuelDelivery[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  @@index([stationId])
+}
+
+model Bill {
+  id               String            @id @default(cuid())
+  supplierId       String
+  supplier         Supplier          @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  reference        String            @default("")
+  businessDate     DateTime          @db.Date
+  dueDate          DateTime?         @db.Date
+  amountCentavos   BigInt
+  netCentavos      BigInt            @default(0)
+  vatCentavos      BigInt            @default(0)
+  withholdingCentavos BigInt         @default(0)
+  note             String            @default("")
+  payments         SupplierPayment[]
+  createdAt        DateTime          @default(now())
+
+  @@index([supplierId])
+}
+
+model SupplierPayment {
+  id             String   @id @default(cuid())
+  supplierId     String
+  supplier       Supplier @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  billId         String?
+  bill           Bill?    @relation(fields: [billId], references: [id], onDelete: SetNull)
+  businessDate   DateTime @db.Date
+  amountCentavos BigInt
+  note           String   @default("")
+  createdAt      DateTime @default(now())
+
+  @@index([supplierId])
+}
+
+model LedgerAccount {
+  id            String        @id @default(cuid())
+  stationId     String
+  station       Station       @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  code          String
+  name          String
+  /// ASSET | LIABILITY | EQUITY | REVENUE | EXPENSE | CONTRA_ASSET
+  type          String
+  /// Debit | Credit
+  normalBalance String
+  classification String       @default("")
+  active        Boolean       @default(true)
+  lines         JournalLine[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@unique([stationId, code])
+  @@index([stationId])
+}
+
+model JournalEntry {
+  id             String        @id @default(cuid())
+  stationId      String
+  station        Station       @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  entryNumber    String
+  businessDate   DateTime      @db.Date
+  description    String
+  sourceDocument String        @default("")
+  /// MANUAL | SALE | COLLECTION | EXPENSE | DELIVERY | PAYROLL | DEPRECIATION | OPENING
+  source         String        @default("MANUAL")
+  note           String        @default("")
+  lines          JournalLine[]
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@unique([stationId, entryNumber])
+  @@index([stationId, businessDate])
+}
+
+model JournalLine {
+  id             String        @id @default(cuid())
+  entryId        String
+  entry          JournalEntry  @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  accountId      String
+  account        LedgerAccount @relation(fields: [accountId], references: [id], onDelete: Restrict)
+  debitCentavos  BigInt        @default(0)
+  creditCentavos BigInt        @default(0)
+  memo           String        @default("")
+
+  @@index([entryId])
+  @@index([accountId])
+}
+
+model FixedAsset {
+  id                        String   @id @default(cuid())
+  stationId                 String
+  station                   Station  @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  assetCode                 String
+  description               String
+  location                  String   @default("")
+  acquiredDate              DateTime @db.Date
+  supplierName              String   @default("")
+  invoiceReference          String   @default("")
+  costCentavos              BigInt
+  residualCentavos          BigInt   @default(0)
+  usefulLifeYears           Int
+  /// STRAIGHT_LINE
+  method                    String   @default("STRAIGHT_LINE")
+  accumulatedDepreciationCentavos BigInt @default(0)
+  custodian                 String   @default("")
+  lastCheckDate             DateTime? @db.Date
+  note                      String   @default("")
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
+
+  @@unique([stationId, assetCode])
+  @@index([stationId])
+}
+
+model PayrollEntry {
+  id                          String   @id @default(cuid())
+  stationId                   String
+  station                     Station  @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  payPeriod                   String
+  employeeId                  String   @default("")
+  employeeName                String
+  position                    String   @default("")
+  shiftName                   String   @default("")
+  basicPayCentavos            BigInt
+  allowancesCentavos          BigInt   @default(0)
+  withholdingCentavos         BigInt    @default(0)
+  sssEmployeeCentavos         BigInt   @default(0)
+  philhealthEmployeeCentavos  BigInt   @default(0)
+  pagibigEmployeeCentavos     BigInt   @default(0)
+  otherDeductionsCentavos     BigInt    @default(0)
+  sssEmployerCentavos         BigInt    @default(0)
+  philhealthEmployerCentavos  BigInt   @default(0)
+  pagibigEmployerCentavos     BigInt   @default(0)
+  costCenter                  String   @default("")
+  approvedBy                  String   @default("")
+  note                        String   @default("")
+  createdAt                   DateTime @default(now())
+  updatedAt                   DateTime @updatedAt
+
+  @@index([stationId, payPeriod])
+}

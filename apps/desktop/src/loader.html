@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Loading Nines</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+        background: linear-gradient(145deg, #0f172a 0%, #1e293b 45%, #0c4a6e 100%);
+        color: #f8fafc;
+      }
+      .panel {
+        text-align: center;
+        padding: 2.5rem 2rem;
+        max-width: 28rem;
+      }
+      h1 {
+        font-size: 1.35rem;
+        font-weight: 600;
+        margin: 0 0 0.75rem;
+      }
+      p {
+        margin: 0;
+        color: #cbd5e1;
+        line-height: 1.5;
+      }
+      .aurora {
+        width: 4rem;
+        height: 4rem;
+        margin: 0 auto 1.25rem;
+        border-radius: 50%;
+        background: conic-gradient(from 0deg, #38bdf8, #818cf8, #22d3ee, #38bdf8);
+        animation: spin 1.4s linear infinite;
+        mask: radial-gradient(circle, transparent 55%, #000 56%);
+        -webkit-mask: radial-gradient(circle, transparent 55%, #000 56%);
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="panel">
+      <div class="aurora" aria-hidden="true"></div>
+      <h1>Waking up the books…</h1>
+      <p>
+        The cloud database may be paused. First load can take 15–30 seconds after idle time.
+      </p>
+    </div>
+  </body>
+</html>
