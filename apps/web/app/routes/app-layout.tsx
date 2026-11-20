@@ -243,31 +243,31 @@ export default function AppLayout({ loaderData }: { loaderData: Me }) {
             type="button"
             variant="ghost"
             size="icon"
-            className={cn("lg:hidden", isDesktop && "nines-no-drag")}
+            className={cn("xl:hidden", isDesktop && "nines-no-drag")}
             aria-label="Open menu"
             onClick={() => setMenuOpen(true)}
           >
             <Menu className="h-4 w-4" />
           </Button>
 
-          <Link to="/" className={cn("flex shrink-0 items-center gap-2", isDesktop && "nines-no-drag")}>
+          <Link to="/" className={cn("flex min-w-0 shrink-0 items-center gap-2", isDesktop && "nines-no-drag")}>
             <span className="text-sm font-semibold tracking-tight">Nines</span>
-            <span className="hidden text-border sm:inline">|</span>
-            <span className="hidden max-w-[140px] truncate text-sm text-muted-foreground sm:inline lg:max-w-[180px]">
+            <span className="hidden text-border 2xl:inline">|</span>
+            <span className="hidden max-w-[160px] truncate text-sm text-muted-foreground 2xl:inline">
               {loaderData.station.name}
             </span>
           </Link>
 
-          <div className={cn("hidden min-w-0 flex-1 justify-center xl:justify-start lg:flex", isDesktop && "nines-no-drag")}>
-            <TopNav items={navItems} className="flex-wrap" />
+          <div className={cn("hidden min-w-0 flex-1 xl:flex", isDesktop && "nines-no-drag")}>
+            <TopNav items={navItems} />
           </div>
 
-          <div className={cn("ml-auto flex items-center gap-1", isDesktop && "nines-no-drag")}>
+          <div className={cn("ml-auto flex shrink-0 items-center gap-0.5 sm:gap-1", isDesktop && "nines-no-drag")}>
             <Button
               type="button"
               variant="outline"
               size="sm"
-              className="hidden h-8 gap-2 text-muted-foreground sm:inline-flex"
+              className="hidden h-8 gap-2 text-muted-foreground 2xl:inline-flex"
               onClick={openPalette}
             >
               <Search className="h-3.5 w-3.5" />
@@ -278,7 +278,7 @@ export default function AppLayout({ loaderData }: { loaderData: Me }) {
               type="button"
               variant="ghost"
               size="icon"
-              className="sm:hidden"
+              className="2xl:hidden"
               aria-label="Open command palette"
               onClick={openPalette}
             >
@@ -290,17 +290,20 @@ export default function AppLayout({ loaderData }: { loaderData: Me }) {
               </Link>
             </Button>
             <ThemeToggle />
-            <span className="hidden text-sm text-muted-foreground xl:inline">{loaderData.user.name}</span>
-            <Button type="button" variant="ghost" size="sm" className="h-8" onClick={signOut}>
+            <span className="hidden text-sm text-muted-foreground 2xl:inline">{loaderData.user.name}</span>
+            <Button type="button" variant="ghost" size="icon" className="sm:hidden" onClick={signOut} aria-label="Sign out">
               <LogOut className="h-4 w-4" />
-              <span className="hidden sm:inline">Sign out</span>
+            </Button>
+            <Button type="button" variant="ghost" size="sm" className="hidden h-8 sm:inline-flex" onClick={signOut}>
+              <LogOut className="h-4 w-4" />
+              <span className="hidden 2xl:inline">Sign out</span>
             </Button>
           </div>
         </div>
       </header>
 
       {menuOpen ? (
-        <div className="fixed inset-0 z-50 print-hide lg:hidden">
+        <div className="fixed inset-0 z-50 print-hide xl:hidden">
           <button
             type="button"
             className="absolute inset-0 bg-foreground/25 backdrop-blur-[1px]"

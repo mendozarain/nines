@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { LucideIcon } from "lucide-react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, MoreHorizontal } from "lucide-react";
 import { Link, NavLink, useLocation } from "react-router";
 import { cn } from "~/lib/utils";
 
@@ -19,7 +19,12 @@ export type TopNavItem = {
   end?: boolean;
   match?: (pathname: string) => boolean;
   children?: TopNavLink[];
+  /** Hide as its own tab below this Tailwind breakpoint; links fold into More. */
+  foldBelow?: "2xl";
 };
+
+/** Items that fold into More on mid-width desktops so the bar stays one row. */
+const FOLD_IDS = new Set(["expenses", "books"]);
 
 function pathActive(pathname: string, item: TopNavItem) {
   if (item.match) return item.match(pathname);
@@ -30,12 +35,20 @@ function pathActive(pathname: string, item: TopNavItem) {
   return (item.children ?? []).some((child) => pathname === child.to || pathname.startsWith(`${child.to}/`));
 }
 
+function itemLinks(item: TopNavItem): TopNavLink[] {
+  if (item.children && item.children.length > 0) return item.children;
+  if (item.to) return [{ to: item.to, label: item.label, end: item.end }];
+  return [];
+}
+
 function NavDropdown({
   item,
   active,
+  compact,
 }: {
   item: TopNavItem;
   active: boolean;
+  compact?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -57,27 +70,30 @@ function NavDropdown({
   }, []);
 
   return (
-    <div className="relative" ref={rootRef}>
+    <div className="relative shrink-0" ref={rootRef}>
       <button
         type="button"
+        title={item.label}
         className={cn(
-          "inline-flex h-9 items-center gap-1.5 rounded-md px-2.5 text-sm transition-colors",
+          "inline-flex h-9 items-center gap-1.5 rounded-md text-sm transition-colors",
+          compact ? "px-2" : "px-2.5",
           active || open
             ? "bg-secondary font-medium text-foreground"
             : "text-muted-foreground hover:bg-secondary/70 hover:text-foreground",
         )}
         aria-expanded={open}
         aria-haspopup="menu"
+        aria-label={item.label}
         onClick={() => setOpen((value) => !value)}
       >
-        <Icon className="h-4 w-4 opacity-70" />
-        <span>{item.label}</span>
-        <ChevronDown className={cn("h-3.5 w-3.5 opacity-50 transition-transform", open && "rotate-180")} />
+        <Icon className="h-4 w-4 shrink-0 opacity-70" />
+        <span className={cn(compact ? "hidden min-[1200px]:inline" : undefined)}>{item.label}</span>
+        <ChevronDown className={cn("h-3.5 w-3.5 shrink-0 opacity-50 transition-transform", open && "rotate-180")} />
       </button>
       {open ? (
         <div
           role="menu"
-          className="absolute left-0 top-[calc(100%+6px)] z-50 min-w-[220px] rounded-lg border border-border bg-popover p-1.5 shadow-lg"
+          className="absolute left-0 top-[calc(100%+6px)] z-50 max-h-[min(70vh,420px)] min-w-[220px] overflow-y-auto rounded-lg border border-border bg-popover p-1.5 shadow-lg"
         >
           {(item.children ?? []).map((child) => (
             <Link
@@ -97,34 +113,129 @@ function NavDropdown({
   );
 }
 
+function NavItem({ item, compact }: { item: TopNavItem; compact?: boolean }) {
+  const { pathname } = useLocation();
+  const active = pathActive(pathname, item);
+  const Icon = item.icon;
+
+  if (item.children && item.children.length > 0) {
+    return <NavDropdown item={item} active={active} compact={compact} />;
+  }
+
+  return (
+    <NavLink
+      to={item.to ?? "/"}
+      end={item.end}
+      title={item.label}
+      aria-label={item.label}
+      className={cn(
+        "inline-flex h-9 shrink-0 items-center gap-1.5 rounded-md text-sm transition-colors",
+        compact ? "px-2" : "px-2.5",
+        active
+          ? "bg-secondary font-medium text-foreground"
+          : "text-muted-foreground hover:bg-secondary/70 hover:text-foreground",
+      )}
+    >
+      <Icon className="h-4 w-4 shrink-0 opacity-70" />
+      <span className={cn(compact ? "hidden min-[1200px]:inline" : undefined)}>{item.label}</span>
+    </NavLink>
+  );
+}
+
+/**
+ * Single-row top nav. On mid-width desktops, Expenses + Books fold into More
+ * so the bar never wraps to two rows.
+ */
 export function TopNav({ items, className }: { items: TopNavItem[]; className?: string }) {
   const { pathname } = useLocation();
 
-  return (
-    <nav className={cn("flex items-center gap-0.5", className)} aria-label="Main">
-      {items.map((item) => {
-        const active = pathActive(pathname, item);
-        const Icon = item.icon;
-        if (item.children && item.children.length > 0) {
-          return <NavDropdown key={item.id} item={item} active={active} />;
+  const { pinned, foldable, moreBase } = useMemo(() => {
+    const pinnedItems: TopNavItem[] = [];
+    const foldableItems: TopNavItem[] = [];
+    let more: TopNavItem | undefined;
+
+    for (const item of items) {
+      if (item.id === "more") {
+        more = item;
+        continue;
+      }
+      if (FOLD_IDS.has(item.id) || item.foldBelow === "2xl") {
+        foldableItems.push(item);
+      } else {
+        pinnedItems.push(item);
+      }
+    }
+
+    return { pinned: pinnedItems, foldable: foldableItems, moreBase: more };
+  }, [items]);
+
+  const wideMore: TopNavItem | null = moreBase
+    ? {
+        ...moreBase,
+        icon: moreBase.icon ?? MoreHorizontal,
+      }
+    : null;
+
+  const compactMore: TopNavItem | null = moreBase
+    ? {
+        id: "more-compact",
+        label: "More",
+        icon: moreBase.icon ?? MoreHorizontal,
+        match: (path) =>
+          Boolean(moreBase.match?.(path)) || foldable.some((item) => pathActive(path, item)),
+        children: [
+          ...foldable.flatMap((item) =>
+            itemLinks(item).map((link) => ({
+              ...link,
+              description: link.description ?? item.label,
+            })),
+          ),
+          ...(moreBase.children ?? []),
+        ],
+      }
+    : foldable.length > 0
+      ? {
+          id: "more-compact",
+          label: "More",
+          icon: MoreHorizontal,
+          match: (path) => foldable.some((item) => pathActive(path, item)),
+          children: foldable.flatMap((item) => itemLinks(item)),
         }
-        return (
-          <NavLink
-            key={item.id}
-            to={item.to ?? "/"}
-            end={item.end}
-            className={cn(
-              "inline-flex h-9 items-center gap-1.5 rounded-md px-2.5 text-sm transition-colors",
-              active
-                ? "bg-secondary font-medium text-foreground"
-                : "text-muted-foreground hover:bg-secondary/70 hover:text-foreground",
-            )}
-          >
-            <Icon className="h-4 w-4 opacity-70" />
-            <span>{item.label}</span>
-          </NavLink>
-        );
-      })}
+      : null;
+
+  // Highlight compact More when a folded destination is active
+  const compactMoreActive = compactMore ? pathActive(pathname, compactMore) : false;
+  const wideMoreActive = wideMore ? pathActive(pathname, wideMore) : false;
+
+  return (
+    <nav
+      className={cn("flex min-w-0 flex-nowrap items-center gap-0.5 overflow-hidden", className)}
+      aria-label="Main"
+    >
+      {pinned.map((item) => (
+        <NavItem key={item.id} item={item} compact />
+      ))}
+
+      {/* Full Expenses / Books — wide screens only */}
+      {foldable.map((item) => (
+        <div key={item.id} className="hidden 2xl:contents">
+          <NavItem item={item} compact />
+        </div>
+      ))}
+
+      {/* Wide More (reports / tax / settings only) */}
+      {wideMore ? (
+        <div className="hidden 2xl:contents">
+          <NavDropdown item={wideMore} active={wideMoreActive} compact />
+        </div>
+      ) : null}
+
+      {/* Mid-width More absorbs Expenses + Books */}
+      {compactMore ? (
+        <div className="contents 2xl:hidden">
+          <NavDropdown item={compactMore} active={compactMoreActive} compact />
+        </div>
+      ) : null}
     </nav>
   );
 }

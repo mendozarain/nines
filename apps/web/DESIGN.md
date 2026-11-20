@@ -16,13 +16,12 @@ Owner feedback: the left sidebar had **too many tabs** and felt busy. Research f
 ### What we ship now
 
 - **No permanent left sidebar.** Full-width content under a single sticky header.
-- **Top navbar** with icon + short label primaries:
-  Home · Sales · Customers · Inventory/Fuel · Cash · Expenses · Books · More
+- **Top navbar stays one row** (never wraps). Mid-width desktops fold Expenses + Books into **More**; full labels return at wide screens.
+- Primaries: Home · Sales · Customers · Inventory/Fuel · Cash · (Expenses · Books at 2xl+) · More
 - **Dropdown menus** hold secondary routes (e.g. Sales → Invoices / New sale; Books → COA, journal, statements…).
 - **Fuel** routes appear only when the fuel module is on; the Inventory group renames to **Fuel** and includes tanks, deliveries, dips, pumps, shifts.
-- **More** holds Reports + Tax calendar + Business settings so the bar stays short.
+- Below `xl` (~1280px): hamburger sheet instead of crowded top links.
 - Gear icon + **Cmd/Ctrl-K** remain for quick jumps.
-- Mobile: hamburger sheet with the same grouped destinations.
 
 ### Visual system (unchanged core)
 
