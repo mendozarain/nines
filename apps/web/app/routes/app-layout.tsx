@@ -1,5 +1,5 @@
 /**
- * Shell redesign: Stripe/Xero job-based nav + Mercury quiet chrome.
+ * Shell redesign: Xero-style top nav (no dense left sidebar).
  * Full notes: apps/web/DESIGN.md
  */
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -7,11 +7,11 @@ import {
   BookOpen,
   CircleDollarSign,
   Fuel,
-  LayoutDashboard,
+  Home,
   LogOut,
   Menu,
+  MoreHorizontal,
   Package,
-  Receipt,
   Search,
   Settings,
   ShoppingCart,
@@ -19,9 +19,9 @@ import {
   Wallet,
   X,
 } from "lucide-react";
-import { NavLink, Outlet, redirect, useNavigate } from "react-router";
+import { Link, Outlet, redirect, useNavigate } from "react-router";
 import { CommandPalette, type CommandItem } from "~/components/command-palette";
-import { SidebarGroup, type SidebarLink } from "~/components/sidebar-group";
+import { MobileNavList, TopNav, type TopNavItem } from "~/components/top-nav";
 import { ThemeToggle } from "~/components/theme-toggle";
 import { Button } from "~/components/ui/button";
 import { api } from "~/lib/api";
@@ -54,82 +54,100 @@ function fuelEnabled(me: Me) {
   return me.station.industry === "FUEL_STATION" || me.station.industry == null;
 }
 
-function Nav({ me, onNavigate }: { me: Me; onNavigate?: () => void }) {
-  const fuel = fuelEnabled(me);
-
-  const sales: SidebarLink[] = [
-    { to: "/sales", label: "Invoices", icon: Receipt },
-    { to: "/sales/new", label: "New sale", icon: ShoppingCart },
-  ];
-  const customers: SidebarLink[] = [{ to: "/customers", label: "Customers", icon: Users }];
-  const inventory: SidebarLink[] = [
-    { to: "/items", label: "Items", icon: Package },
+function buildNavItems(fuel: boolean): TopNavItem[] {
+  const inventoryChildren = [
+    { to: "/items", label: "Items", description: "Products and prices" },
     ...(fuel
       ? [
-          { to: "/fuel/tanks", label: "Tanks", icon: Fuel },
-          { to: "/fuel/deliveries", label: "Deliveries" },
-          { to: "/fuel/dips", label: "Dips" },
-          { to: "/station", label: "Pumps" },
-          { to: "/shifts", label: "Shifts" },
+          { to: "/fuel/tanks", label: "Tanks", description: "Fuel inventory" },
+          { to: "/fuel/deliveries", label: "Deliveries", description: "Incoming fuel" },
+          { to: "/fuel/dips", label: "Dips", description: "Stick readings" },
+          { to: "/station", label: "Pumps", description: "Pump setup" },
+          { to: "/shifts", label: "Shifts", description: "Open and close" },
         ]
       : []),
   ];
-  const cash: SidebarLink[] = [
-    { to: "/cash", label: "Reconciliation", icon: Wallet },
-    ...(fuel ? [{ to: "/shifts", label: "Shifts" }] : []),
-  ];
-  const expenses: SidebarLink[] = [
-    { to: "/expenses", label: "Expenses", icon: CircleDollarSign },
-    { to: "/payables", label: "Suppliers" },
-  ];
-  const books: SidebarLink[] = [
-    { to: "/books", label: "Chart of accounts", icon: BookOpen },
-    { to: "/books/journal", label: "Journal" },
-    { to: "/books/trial-balance", label: "Trial balance" },
-    { to: "/books/statements", label: "Statements" },
-    { to: "/books/assets", label: "Fixed assets" },
-    { to: "/books/payroll", label: "Payroll" },
-  ];
-  const reports: SidebarLink[] = [
-    { to: "/reports", label: "Daily / monthly / VAT" },
-    { to: "/books/tax-calendar", label: "Tax calendar" },
-  ];
-  const settings: SidebarLink[] = [{ to: "/station", label: "Business", icon: Settings }];
 
-  return (
-    <nav className="grid gap-4" aria-label="Main" data-sidebar>
-      <NavLink
-        to="/"
-        end
-        onClick={onNavigate}
-        className={({ isActive }) =>
-          cn(
-            "flex items-center gap-2 rounded-md px-2.5 py-1.5 text-sm",
-            isActive
-              ? "bg-secondary font-medium text-foreground"
-              : "text-sidebar-foreground hover:bg-secondary/70 hover:text-foreground",
-          )
-        }
-      >
-        <LayoutDashboard className="h-4 w-4 opacity-70" />
-        Home
-      </NavLink>
-      <SidebarGroup label="Sales" icon={ShoppingCart} links={sales} onNavigate={onNavigate} />
-      <SidebarGroup label="Customers" icon={Users} links={customers} onNavigate={onNavigate} />
-      <SidebarGroup
-        label={fuel ? "Inventory / Fuel" : "Inventory"}
-        icon={Package}
-        links={inventory}
-        defaultOpen={fuel}
-        onNavigate={onNavigate}
-      />
-      <SidebarGroup label="Cash" icon={Wallet} links={cash} onNavigate={onNavigate} />
-      <SidebarGroup label="Expenses" icon={CircleDollarSign} links={expenses} onNavigate={onNavigate} />
-      <SidebarGroup label="Books" icon={BookOpen} links={books} defaultOpen={false} onNavigate={onNavigate} />
-      <SidebarGroup label="Reports" icon={Receipt} links={reports} defaultOpen={false} onNavigate={onNavigate} />
-      <SidebarGroup label="Settings" icon={Settings} links={settings} onNavigate={onNavigate} />
-    </nav>
-  );
+  return [
+    {
+      id: "home",
+      label: "Home",
+      icon: Home,
+      to: "/",
+      end: true,
+    },
+    {
+      id: "sales",
+      label: "Sales",
+      icon: ShoppingCart,
+      match: (path) => path.startsWith("/sales"),
+      children: [
+        { to: "/sales", label: "Invoices", description: "All sales" },
+        { to: "/sales/new", label: "New sale", description: "Record a sale" },
+      ],
+    },
+    {
+      id: "customers",
+      label: "Customers",
+      icon: Users,
+      to: "/customers",
+    },
+    {
+      id: "inventory",
+      label: fuel ? "Fuel" : "Inventory",
+      icon: fuel ? Fuel : Package,
+      match: (path) =>
+        path.startsWith("/items") ||
+        path.startsWith("/fuel") ||
+        (fuel && (path.startsWith("/shifts") || path === "/station")),
+      children: inventoryChildren,
+    },
+    {
+      id: "cash",
+      label: "Cash",
+      icon: Wallet,
+      match: (path) => path.startsWith("/cash") || (!fuel && path.startsWith("/shifts")),
+      children: [
+        { to: "/cash", label: "Reconciliation", description: "Count and close" },
+        { to: "/shifts", label: "Shifts", description: "Shift history" },
+      ],
+    },
+    {
+      id: "expenses",
+      label: "Expenses",
+      icon: CircleDollarSign,
+      match: (path) => path.startsWith("/expenses") || path.startsWith("/payables") || path.startsWith("/supplier"),
+      children: [
+        { to: "/expenses", label: "Expenses", description: "What you spend" },
+        { to: "/payables", label: "Suppliers", description: "Who you pay" },
+      ],
+    },
+    {
+      id: "books",
+      label: "Books",
+      icon: BookOpen,
+      match: (path) => path.startsWith("/books"),
+      children: [
+        { to: "/books", label: "Chart of accounts" },
+        { to: "/books/journal", label: "Journal" },
+        { to: "/books/trial-balance", label: "Trial balance" },
+        { to: "/books/statements", label: "Statements" },
+        { to: "/books/assets", label: "Fixed assets" },
+        { to: "/books/payroll", label: "Payroll" },
+      ],
+    },
+    {
+      id: "more",
+      label: "More",
+      icon: MoreHorizontal,
+      match: (path) => path.startsWith("/reports") || path.startsWith("/books/tax"),
+      children: [
+        { to: "/reports", label: "Reports", description: "Daily, monthly, VAT" },
+        { to: "/books/tax-calendar", label: "Tax calendar" },
+        { to: "/station", label: "Business settings", description: "Station and modules" },
+      ],
+    },
+  ];
 }
 
 export default function AppLayout({ loaderData }: { loaderData: Me }) {
@@ -160,18 +178,41 @@ export default function AppLayout({ loaderData }: { loaderData: Me }) {
     navigate("/login");
   }, [navigate]);
 
+  const fuel = fuelEnabled(loaderData);
+  const navItems = useMemo(() => buildNavItems(fuel), [fuel]);
+
   const commands: CommandItem[] = useMemo(
     () => [
+      { id: "home", label: "Go to home", hint: "Dashboard", run: () => navigate("/") },
       { id: "sale", label: "New sale", hint: "Sales", keywords: "invoice", run: () => navigate("/sales/new") },
-      { id: "expense", label: "New expense", hint: "Expenses", run: () => navigate("/expenses") },
-      { id: "collection", label: "Record collection", hint: "Customers", run: () => navigate("/customers") },
-      { id: "close-day", label: "Close the day", hint: "Cash", run: () => navigate("/cash") },
-      { id: "customers", label: "Go to customers", run: () => navigate("/customers") },
-      { id: "books", label: "Go to books", run: () => navigate("/books") },
+      { id: "invoices", label: "Invoices", hint: "Sales", run: () => navigate("/sales") },
+      { id: "customers", label: "Customers", run: () => navigate("/customers") },
+      { id: "items", label: "Items", hint: "Inventory", run: () => navigate("/items") },
+      ...(fuel
+        ? [
+            { id: "tanks", label: "Tanks", hint: "Fuel", run: () => navigate("/fuel/tanks") },
+            { id: "deliveries", label: "Deliveries", hint: "Fuel", run: () => navigate("/fuel/deliveries") },
+            { id: "dips", label: "Dip readings", hint: "Fuel", run: () => navigate("/fuel/dips") },
+            { id: "pumps", label: "Pumps", hint: "Fuel", run: () => navigate("/station") },
+          ]
+        : []),
+      { id: "cash", label: "Cash reconciliation", hint: "Cash", run: () => navigate("/cash") },
+      { id: "shifts", label: "Shifts", hint: "Cash", run: () => navigate("/shifts") },
+      { id: "expense", label: "Expenses", hint: "Spend", run: () => navigate("/expenses") },
+      { id: "suppliers", label: "Suppliers", hint: "Payables", run: () => navigate("/payables") },
+      { id: "books", label: "Chart of accounts", hint: "Books", run: () => navigate("/books") },
+      { id: "journal", label: "Journal", hint: "Books", run: () => navigate("/books/journal") },
+      { id: "tb", label: "Trial balance", hint: "Books", run: () => navigate("/books/trial-balance") },
+      { id: "statements", label: "Statements", hint: "Books", run: () => navigate("/books/statements") },
+      { id: "assets", label: "Fixed assets", hint: "Books", run: () => navigate("/books/assets") },
+      { id: "payroll", label: "Payroll", hint: "Books", run: () => navigate("/books/payroll") },
+      { id: "reports", label: "Reports", run: () => navigate("/reports") },
+      { id: "tax", label: "Tax calendar", run: () => navigate("/books/tax-calendar") },
+      { id: "settings", label: "Business settings", run: () => navigate("/station") },
       { id: "theme", label: "Toggle theme", keywords: "dark light", run: () => toggleTheme() },
       { id: "signout", label: "Sign out", run: () => void signOut() },
     ],
-    [navigate, signOut],
+    [fuel, navigate, signOut],
   );
 
   if (!loaderData.user) {
@@ -183,78 +224,114 @@ export default function AppLayout({ loaderData }: { loaderData: Me }) {
   }
 
   return (
-    <div className="app-shell bg-background">
+    <div className="app-shell min-h-screen bg-background">
       <a
         href="#main"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-background focus:px-3 focus:py-2"
       >
         Skip to content
       </a>
+
       <header
         className={cn(
-          "app-chrome sticky top-0 z-30 border-b border-border print-hide",
+          "app-chrome sticky top-0 z-40 border-b border-border/80 bg-background/90 backdrop-blur-md print-hide",
           isDesktop && "nines-drag-region",
         )}
       >
-        <div className="flex h-12 items-center gap-3 px-4">
+        <div className="mx-auto flex h-14 max-w-[1400px] items-center gap-2 px-4 sm:gap-3 sm:px-5">
           <Button
             type="button"
             variant="ghost"
             size="icon"
-            className={cn("md:hidden", isDesktop && "nines-no-drag")}
+            className={cn("lg:hidden", isDesktop && "nines-no-drag")}
             aria-label="Open menu"
             onClick={() => setMenuOpen(true)}
           >
-            <Menu />
+            <Menu className="h-4 w-4" />
           </Button>
-          <div className="flex min-w-0 items-center gap-2">
+
+          <Link to="/" className={cn("flex shrink-0 items-center gap-2", isDesktop && "nines-no-drag")}>
             <span className="text-sm font-semibold tracking-tight">Nines</span>
             <span className="hidden text-border sm:inline">|</span>
-            <span className="hidden truncate text-sm text-muted-foreground sm:inline">{loaderData.station.name}</span>
+            <span className="hidden max-w-[140px] truncate text-sm text-muted-foreground sm:inline lg:max-w-[180px]">
+              {loaderData.station.name}
+            </span>
+          </Link>
+
+          <div className={cn("hidden min-w-0 flex-1 justify-center xl:justify-start lg:flex", isDesktop && "nines-no-drag")}>
+            <TopNav items={navItems} className="flex-wrap" />
           </div>
+
           <div className={cn("ml-auto flex items-center gap-1", isDesktop && "nines-no-drag")}>
-            <Button type="button" variant="outline" size="sm" className="hidden h-8 gap-2 sm:inline-flex" onClick={openPalette}>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="hidden h-8 gap-2 text-muted-foreground sm:inline-flex"
+              onClick={openPalette}
+            >
               <Search className="h-3.5 w-3.5" />
               Search
               <kbd className="rounded border border-border bg-muted px-1 text-[10px] text-muted-foreground">⌘K</kbd>
             </Button>
-            <Button type="button" variant="ghost" size="icon" className="sm:hidden" aria-label="Open command palette" onClick={openPalette}>
-              <Search />
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="sm:hidden"
+              aria-label="Open command palette"
+              onClick={openPalette}
+            >
+              <Search className="h-4 w-4" />
+            </Button>
+            <Button type="button" variant="ghost" size="icon" asChild aria-label="Settings">
+              <Link to="/station">
+                <Settings className="h-4 w-4" />
+              </Link>
             </Button>
             <ThemeToggle />
-            <span className="hidden text-sm text-muted-foreground lg:inline">{loaderData.user.name}</span>
+            <span className="hidden text-sm text-muted-foreground xl:inline">{loaderData.user.name}</span>
             <Button type="button" variant="ghost" size="sm" className="h-8" onClick={signOut}>
-              <LogOut />
+              <LogOut className="h-4 w-4" />
               <span className="hidden sm:inline">Sign out</span>
             </Button>
           </div>
         </div>
       </header>
+
       {menuOpen ? (
-        <div className="fixed inset-0 z-40 print-hide md:hidden">
-          <button className="absolute inset-0 bg-black/40" aria-label="Close menu" onClick={() => setMenuOpen(false)} />
-          <div className="app-sidebar absolute left-0 top-0 flex h-full w-72 flex-col gap-4 overflow-y-auto border-r border-border p-4 shadow-lg">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-semibold">{loaderData.station.name}</span>
+        <div className="fixed inset-0 z-50 print-hide lg:hidden">
+          <button
+            type="button"
+            className="absolute inset-0 bg-foreground/25 backdrop-blur-[1px]"
+            aria-label="Close menu"
+            onClick={() => setMenuOpen(false)}
+          />
+          <div className="app-sidebar absolute inset-y-0 left-0 flex w-[min(100%,320px)] flex-col border-r border-border bg-background shadow-xl">
+            <div className="flex h-14 items-center justify-between border-b border-border px-4">
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold">Nines</p>
+                <p className="truncate text-xs text-muted-foreground">{loaderData.station.name}</p>
+              </div>
               <Button type="button" variant="ghost" size="icon" aria-label="Close menu" onClick={() => setMenuOpen(false)}>
-                <X />
+                <X className="h-4 w-4" />
               </Button>
             </div>
-            <Nav me={loaderData} onNavigate={() => setMenuOpen(false)} />
+            <div className="flex-1 overflow-y-auto p-4">
+              <MobileNavList items={navItems} onNavigate={() => setMenuOpen(false)} />
+            </div>
+            <div className="border-t border-border p-4">
+              <p className="truncate text-sm font-medium">{loaderData.user.name}</p>
+              <p className="truncate text-xs text-muted-foreground">{loaderData.user.email}</p>
+            </div>
           </div>
         </div>
       ) : null}
-      <div className="mx-auto grid max-w-[1400px] md:grid-cols-[232px_minmax(0,1fr)]">
-        <aside
-          className="app-sidebar print-hide hidden min-h-[calc(100vh-3rem)] border-r border-border p-3 md:block"
-          data-sidebar
-        >
-          <Nav me={loaderData} />
-        </aside>
-        <main id="main" className="px-4 py-5 md:px-6 md:py-6">
-          <Outlet context={loaderData} />
-        </main>
-      </div>
+
+      <main id="main" className="mx-auto w-full max-w-[1400px] px-4 py-5 sm:px-6 sm:py-6">
+        <Outlet context={loaderData} />
+      </main>
+
       <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} items={commands} />
     </div>
   );
@@ -264,7 +341,9 @@ export function ErrorBoundary() {
   return (
     <main className="mx-auto max-w-lg p-8">
       <h1 className="text-xl font-semibold">This page didn’t load</h1>
-      <p className="mt-2 text-sm text-muted-foreground">Refresh and try again. If it keeps happening, check that the API is running.</p>
+      <p className="mt-2 text-sm text-muted-foreground">
+        Refresh and try again. If it keeps happening, check that the API is running.
+      </p>
     </main>
   );
 }
